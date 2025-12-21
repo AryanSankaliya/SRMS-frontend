@@ -7,13 +7,11 @@ function Requestlist() {
         {id:102 , title:"Leptop not charged" , status:"In Progress"}
 
     ]
-
-    
   return (
-    <div>
+    <div className='grid content-center'>
         <h3>request</h3>
-        {data.map((item)=>{
-            <p key={index}>{item.title} - {item.status}</p>
+        {data.map((item , index)=>{
+          return (<p key={index}>{item.title}-{item.status}</p>)
         })}
     </div>
   )
