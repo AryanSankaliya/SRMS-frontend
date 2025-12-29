@@ -6,16 +6,6 @@ export default function Header() {
 
       {/* Left Section */}
       <div className="flex items-center gap-10">
-        {/* Logo and Name */}
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-gradient-to-tr from-blue-600 to-teal-600 rounded-lg flex items-center justify-center text-white font-bold">
-            SR
-          </div>
-          <div>
-            <h1 className="text-sm font-semibold text-gray-800">SRMS</h1>
-            <p className="text-xs text-gray-500">Service Request</p>
-          </div>
-        </div>
 
         <div className="flex flex-col">
           <span className="text-lg font-semibold text-gray-800">

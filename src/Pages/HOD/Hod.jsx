@@ -1,15 +1,14 @@
 import React from 'react'
 import Requestlist from '../../Components/Request List/Requestlist'
-import Header from '../../Components/Header/Header'
-import Footer from '../../Components/Footer/Footer'
-import Sidebar from '../../Components/Sidebar/Sidebar'
+import Dashboard from '../../Components/Dashboard/Dashboard'
 
 function Hod() {
   return (
     <>
-      <Header/>
+
+    <Dashboard>
       <Requestlist />
-      <Footer />
+    </Dashboard>
 
     </>
   )

@@ -50,7 +50,7 @@ function Forgot_Password() {
           {/* Back to Login */}
           <div className="flex items-center gap-2 text-blue-500 cursor-pointer hover:underline text-sm">
             <FaArrowLeft />
-            <span onClick={()=> navigate("/login")} >Back to Login</span>
+            <span onClick={()=> navigate("/")} >Back to Login</span>
           </div>
 
           <h4 className="text-2xl font-semibold">Forgot Password</h4>
