@@ -1,75 +1,253 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 function AddRequestForm() {
+  const [Priority, setPriority] = useState(null)
+  const [files, setFiles] = useState([]);
+
+  const [serviceType, setServiceType] = useState("");
+  const [category, setCategory] = useState("");
+
+  const categoryMap = {
+    Hardware: [
+      "Laptop Issue",
+      "Printer Issue",
+      "Mouse / Keyboard",
+      "Screen Problem",
+    ],
+    Software: [
+      "OS Issue",
+      "Application Error",
+      "Installation Problem",
+      "License Issue",
+    ],
+    Network: [
+      "WiFi Not Working",
+      "LAN Issue",
+      "Slow Internet",
+    ],
+    Electrical: [
+      "Power Failure",
+      "Switch Board Issue",
+    ],
+    Facilities: [
+      "AC Problem",
+      "Furniture Issue",
+    ],
+    Other: [
+      "Miscellaneous",
+    ],
+  };
+
+
+  const handleFiles = (selectedFiles) => {
+    const validFiles = Array.from(selectedFiles).filter((file) => {
+      const isValidType = [
+        "image/png",
+        "image/jpeg",
+        "application/pdf",
+      ].includes(file.type);
+
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
+
+      return isValidType && isValidSize;
+    });
+
+    setFiles((prev) => [...prev, ...validFiles]);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    handleFiles(e.dataTransfer.files);
+  };
+
+  const removeFile = (index) => {
+    setFiles(files.filter((_, i) => i !== index));
+  };
+
+
   return (
     <>
-      <form className='max-w-md mx-auto m-6 border rounded-lg p-6 shadow-md space-y-4'>
-        <h2 className='text-xl font-semibold text-center'>Service Request Form</h2>
+      <div className="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow">
+        {/* Header */}
+        <h2 className="text-xl font-semibold mb-1">Request Details</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Please fill in the information below to submit a new ticket.
+        </p>
 
-        {/* Request NO. */}
-        <div>
-          <label className='block mb-1 font-medium'>Request No.</label>
+        {/* Request Title */}
+        <div className="mb-5">
+          <label className="block text-sm font-medium mb-1">
+            Request Title <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
-            placeholder='SR-102'
-            className='w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 ' />
+            placeholder="E.g., Laptop screen flickering issue"
+            className="w-full border border-gray-300 rounded-md px-4 py-2 outline-none transition focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
         </div>
 
-        {/* Title */}
+        {/* Service Type & Category */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Service Type <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="w-full border border-gray-300 rounded-md px-4 py-2 outline-none transition focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              onChange={(e) => {
+                setServiceType(e.target.value)
+                setCategory("")
+              }}>
+              <option>Select a type...</option>
+              <option>Hardware</option>
+              <option>Software</option>
+              <option>Network</option>
+              <option>Electrical</option>
+              <option>Facilities</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Category <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="w-full border border-gray-300 rounded-md px-4 py-2 outline-none transition focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              onChange={(e) => setCategory(e.target.value)}>
+              <option>Select a category...</option>
+              {serviceType &&
+                categoryMap[serviceType]?.map((cat , index) => (
+                  <option key={index} value={cat}>{cat}</option>
+                )
+                )}
+            </select>
+          </div>
+        </div>
+
+        {/* Department & Priority */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Department <span className="text-red-500">*</span>
+            </label>
+            <select className="w-full border border-gray-300 rounded-md px-4 py-2 outline-none transition focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option>Select your department...</option>
+              <option>IT Department</option>
+              <option>Computer Science</option>
+              <option>Mechanical Engineering</option>
+              <option>Civil Engineering</option>
+              <option>Electrical Engineering</option>
+              <option>Administration</option>
+              <option>Accounts</option>
+
+
+
+
+
+
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Priority <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-3">
+              <button
+                className={`px-6 py-2 border rounded-md border-green-400 
+                ${Priority === "low"
+                    ? "bg-green-600 text-white"
+                    : "text-green-600 hover:bg-green-600 hover:text-white"
+                  }`}
+                onClick={() => setPriority("low")}>
+                ● Low
+              </button>
+              <button
+                className={`px-6 py-2 border rounded-md border-yellow-500 
+                ${Priority === "medium"
+                    ? "bg-yellow-400 text-white"
+                    : "text-yellow-400 hover:bg-yellow-400 hover:text-white"
+                  }`}
+                onClick={() => setPriority("medium")}>
+                ● Medium
+              </button>
+              <button
+                className={`px-6 py-2 border rounded-md border-[#d00000]
+                ${Priority === "high"
+                    ? "bg-[#d00000] text-white "
+                    : "text-[#dc2f02] hover:bg-[#d00000] hover:text-white"
+                  }   `}
+                onClick={() => setPriority("high")}>
+                ● High
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="mb-5">
+          <label className="block text-sm font-medium mb-1">
+            Description <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            rows="4"
+            placeholder="Please describe the issue or request in detail..."
+            className="w-full border border-gray-300 rounded-md px-4 py-2 outline-none transition focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Include any error messages or specific circumstances where the issue occurs.
+          </p>
+        </div>
+
+        {/* Attachments */}
         <div>
-          <label className='block mb-1 font-medium'>Title</label>
-          <input
-            type="text"
-            placeholder='Leptop dead'
-            className='w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400' />
+          <label className="block text-sm font-medium mb-2">Attachments</label>
+
+          <div
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+            className="border-2 border-dashed rounded-md p-8 text-center cursor-pointer hover:border-blue-500 transition"
+          >
+            <input
+              type="file"
+              multiple
+              accept=".png,.jpg,.jpeg,.pdf"
+              className="hidden"
+              id="fileUpload"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+
+            <label htmlFor="fileUpload" className="cursor-pointer">
+              <p className="text-blue-600 font-medium">Upload a file</p>
+              <p className="text-sm text-gray-500">
+                or drag and drop PNG, JPG, PDF up to 10MB
+              </p>
+            </label>
+          </div>
+
+          {/* Uploaded files list */}
+          {files.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {files.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center bg-gray-100 px-3 py-2 rounded"
+                >
+                  <span className="text-sm truncate">{file.name}</span>
+                  <button
+                    onClick={() => removeFile(index)}
+                    className="text-red-500 text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Type */}
-        <div>
-          <label className='block mb-1 font-medium'>Type</label>
-          <input
-            type="text"
-            placeholder='Computer Issue'
-            className='w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400' />
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block mb-1 font-medium">Status</label>
-          <select className='w-full border rounded px-3 py-3'>
-            <option>Pending</option>
-            <option>In Progress</option>
-            <option>Completed</option>
-          </select>
-        </div>
-
-        {/* Date */}
-        <div>
-          <label className='block mb-1 font-medium'>Date</label>
-          <input type="date"
-            placeholder='25-12-2025'
-            className='w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400' />
-        </div>
-
-        {/* {Final status} */}
-        <div>
-          <label className="block mb-1 font-medium">Final Status</label>
-          <select className='w-full border rounded px-3 py-3'>
-            <option>Open</option>
-            <option>Closed</option>
-          </select>
-        </div>
-
-        {/* Submit btn */}
-        <button
-          type='submit'
-          className='w-full bg-gradient-to-tr from-blue-400 to-teal-500 text-white py-2 rounded hover:opacity-90 transition'
-        >
-         Submit
-        </button>
-
-
-      </form>
+      </div>
     </>
   )
 }

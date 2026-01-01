@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { FaFilter, FaSearch } from 'react-icons/fa';
+import StatusTable from '../../Components/StatusTable/StatusTable';
+import StatusDropdown from '../../Components/StatusDropdown/StatusDropdown';
 
 function Status() {
+    // serach bar
     const [searchTerm, setSearchTerm] = useState('');
+    // status manu 
+    const [statusFilter, setStatusFilter] = useState("All");
+
+
+    const role = "student";
 
     const data = [
         {
@@ -46,79 +54,69 @@ function Status() {
 
     ]
 
-    const filteredData = data.filter(
-        item =>
+    const filteredData = data.filter(item => {
+        const matchesStatus =
+            statusFilter === "All" || item.status === statusFilter;
+
+        const matchesSearch =
             item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+            item.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return matchesStatus && matchesSearch;
+    });
+
 
     return (
         <>
             <div className='w-full bg-white rounded-3xl shadow-md flex items-center justify-between p-4'>
                 {/* LEFT GROUP */}
                 <div className='flex items-center gap-3'>
-                    <div className="flex items-center gap-2 border-2 border-gray-300 rounded-full px-4 py-2 w-64 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-200 transition">
+                    <div className="
+                            flex items-center gap-2
+                            border-2 border-gray-300
+                            rounded-full px-4 py-2 w-64
+                            transition
+                            focus-within:border-teal-500
+                            focus-within:ring-0
+                            focus-within:outline-none
+                        ">
                         <FaSearch className="text-teal-400" />
+
                         <input
                             type="text"
-                            placeholder='Search by ID, Title'
-                            className="w-full outline-none text-sm text-gray-700 placeholder-gray-400 focus:text-teal-700 caret-teal-500"
+                            placeholder="Search by ID, Title"
+                            className="
+                            w-full bg-transparent
+                            text-sm text-gray-700 placeholder-gray-400
+                            outline-none border-none ring-0
+                            focus:outline-none  focus:ring-0 focus:border-none
+                            focus:text-teal-700 caret-teal-500"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
-                    {/* Apply Button */}
-                    <div className='flex items-center gap-2 border rounded-full px-4 py-2 text-sm text-gray-700 cursor-pointer hover:border-teal-400 transition'>
-                        <span>All Status</span>
-                        <svg
-                            className="w-4 h-4 text-gray-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
+
+                    {/* RIGHT: Status Dropdown */}
+                    <div className="flex gap-3">
+                        <StatusDropdown
+                            value={statusFilter}
+                            onChange={setStatusFilter}
+                        />
                     </div>
                 </div>
 
-                {/* RIGHT: Status Dropdown */}
-                <button className='flex items-center gap-2 bg-teal-400 hover:bg-teal-500 text-black font-medium px-6 py-2 rounded-full transition'>
+                {/* Apply Button */}
+                <button className='flex items-center gap-2 bg-[#8ecae6] hover:bg-[#219ebc] text-black font-medium px-6 py-2 rounded-full transition'>
                     <FaFilter />
                     Apply Filters
                 </button>
             </div>
 
-            <div className='bg-white rounded-3xl shadow-md p-6 w-full mt-5'>
-                {/* Header */}
-                <div className='grid grid-cols-6 text-sm text-teal-600 font-semibold pb-4 border-b'>
-                    <div>REQUEST NO</div>
-                    <div>TITLE</div>
-                    <div>TYPE</div>
-                    <div>STATUS</div>
-                    <div>DATE</div>
-                    <div>FINAL STATUS</div>
-                </div>
-
-                {/* Rows */}
-                {filteredData.map((item, index) => (
-                    <div key={index} className='grid grid-cols-6 items-center py-4 border-b last:border-none hover:bg-gray-50 transition'>
-                        <div className='font-medium text-gray-800'>{item.id}</div>
-                        <div>
-                            <p className="font-semibold text-gray-900">{item.title}</p>
-                        </div>
-                        <div>
-                            <span className={`px-3 py-1 text-sm rounded-full ${item.typeBg} ${item.typeText}`}>{item.type}</span>
-                        </div>
-                        <div>
-                            <span className={`px-3 py-1 text-sm rounded-full ${item.statusBg} ${item.statusText}`}>{item.status}</span>
-                        </div>
-                        <div className="text-gray-600">{item.date}</div>
-                        <div className={`px-3 w-14 py-1 text-sm rounded-full ${item.final_status === 'Open' ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-700'
-                            }`}>{item.final_status}</div>
-                    </div>
-                ))}
-            </div>
+            <StatusTable
+                data={filteredData}
+                role={role}
+            />
 
         </>
     );
