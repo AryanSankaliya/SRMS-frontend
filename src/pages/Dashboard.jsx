@@ -1,6 +1,8 @@
-import Sidebar from "../../Components/Sidebar/Sidebar";
-import Header from "../../Components/Header/Header";
-import Footer from "../../Components/Footer/Footer";
+
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
+import Footer from "../components/Footer";
+
 
 
 

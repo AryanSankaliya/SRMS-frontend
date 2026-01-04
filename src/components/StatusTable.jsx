@@ -2,7 +2,6 @@ function StatusTable({ data, role }) {
 
     // column control based on role
     const showFinalStatus = role !== "Technician";
-    // const showStatus = role === "Technician";
 
     return (
         <div className='bg-white rounded-3xl shadow-md p-6 w-full mt-5'>

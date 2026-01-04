@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { FaFilter, FaSearch } from 'react-icons/fa';
-import StatusTable from '../../Components/StatusTable/StatusTable';
-import StatusDropdown from '../../Components/StatusDropdown/StatusDropdown';
+import StatusDropdown from '../components/StatusDropdown';
+import StatusTable from '../components/StatusTable';
+
 
 function Status() {
     // serach bar

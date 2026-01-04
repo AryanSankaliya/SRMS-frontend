@@ -8,7 +8,7 @@ import {
   Phone,
   Lock
 } from "lucide-react";
-import Dashboard from "../../Components/Dashboard/Dashboard";
+import Dashboard from "./Dashboard";
 
 function UserProfile() {
   return (
