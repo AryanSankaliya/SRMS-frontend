@@ -3,10 +3,7 @@ import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
 
-
-
-
-export default function Dashboard({ children }) {
+export default function Dashboard({ children ,userName, role }) {
   return (
     <div className="flex min-h-screen bg-gray-100">
       
@@ -15,7 +12,11 @@ export default function Dashboard({ children }) {
 
       {/* Right side */}
       <div className="flex flex-col flex-1">
-        <Header/>
+        <Header
+          title="Dashboard"
+          breadcrumb={["Dashboard"]}
+          userName={userName}
+          role={role}/>
 
         {/* Page Content */}
         <main className="flex-1 p-6">

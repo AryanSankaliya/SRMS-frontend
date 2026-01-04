@@ -4,7 +4,7 @@ import Requestlist from "../../components/Requestlist";
 
 function Hod() {
   return (
-    <Dashboard>
+    <Dashboard userName="Aryan" role="HOD">
       <Requestlist />
     </Dashboard>
   );

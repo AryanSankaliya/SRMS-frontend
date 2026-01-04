@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-
 // Auth
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -8,7 +7,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 // Common
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import Status from "./pages/Status";
 
 // Roles
 import User from "./pages/roles/User";
@@ -23,10 +21,10 @@ import ServiceDepartmentPersonMaster from "./pages/admin/ServiceDepartmentPerson
 import ServiceRequestTypeMaster from "./pages/admin/ServiceRequestTypeMaster";
 import ServiceRequestTypeWisePerson from "./pages/admin/ServiceRequestTypeWisePerson";
 
-// Components 
+// Components
 import AddRequestForm from "./components/AddRequestForm";
 import EditRequestForm from "./components/EditRequestForm";
-
+import Notfound from "./pages/Notfound";
 
 function App() {
   return (
@@ -39,7 +37,6 @@ function App() {
         {/* Common */}
         <Route path="/" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/status" element={<Status />} />
 
         {/* Roles */}
         <Route path="/user" element={<User />} />
@@ -50,22 +47,18 @@ function App() {
         <Route path="/admin/service-department" element={<ServiceDepartmentMaster />} />
         <Route path="/admin/service-type" element={<ServiceTypeMaster />} />
         <Route path="/admin/status-master" element={<StatusMaster />} />
-        <Route
-          path="/admin/service-department-person"
-          element={<ServiceDepartmentPersonMaster />}
-        />
-        <Route
-          path="/admin/service-request-type"
-          element={<ServiceRequestTypeMaster />}
-        />
-        <Route
-          path="/admin/service-request-type-wise-person"
-          element={<ServiceRequestTypeWisePerson />}
-        />
+        <Route path="/admin/service-department-person" element={<ServiceDepartmentPersonMaster />} />
+        <Route path="/admin/service-request-type" element={<ServiceRequestTypeMaster />} />
+        <Route path="/admin/service-request-type-wise-person" element={<ServiceRequestTypeWisePerson />} />
 
         {/* Forms */}
         <Route path="/request/add" element={<AddRequestForm />} />
         <Route path="/request/edit" element={<EditRequestForm />} />
+
+        <Route path="*" element={<Notfound />} />
+
+
+
       </Routes>
     </BrowserRouter>
   );

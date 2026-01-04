@@ -4,7 +4,7 @@ import AddRequestForm from "../../components/AddRequestForm";
 
 function User() {
   return (
-    <Dashboard>
+    <Dashboard userName="Ajay" role="USER">
       <AddRequestForm />
     </Dashboard>
   );
