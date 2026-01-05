@@ -4,7 +4,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 
-// Common
+// Layout
+import MainLayout from "./pages/MainLayout";
+
+// Pages
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 
@@ -25,39 +28,43 @@ import ServiceRequestTypeWisePerson from "./pages/admin/ServiceRequestTypeWisePe
 import AddRequestForm from "./components/AddRequestForm";
 import EditRequestForm from "./components/EditRequestForm";
 import Notfound from "./pages/Notfound";
+import Requestlist from "./components/Requestlist";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Auth */}
+
+        {/* Auth (NO sidebar) */}
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Common */}
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
+        {/* Layout Routes (WITH sidebar/header/footer) */}
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
 
-        {/* Roles */}
-        <Route path="/user" element={<User />} />
-        <Route path="/hod" element={<Hod />} />
-        <Route path="/tech" element={<Tech />} />
+          {/* Roles */}
+          <Route path="user" element={<User />} />
+          <Route path="hod" element={<Hod />} />
+          <Route path="tech" element={<Tech />} />
 
-        {/* Admin */}
-        <Route path="/admin/service-department" element={<ServiceDepartmentMaster />} />
-        <Route path="/admin/service-type" element={<ServiceTypeMaster />} />
-        <Route path="/admin/status-master" element={<StatusMaster />} />
-        <Route path="/admin/service-department-person" element={<ServiceDepartmentPersonMaster />} />
-        <Route path="/admin/service-request-type" element={<ServiceRequestTypeMaster />} />
-        <Route path="/admin/service-request-type-wise-person" element={<ServiceRequestTypeWisePerson />} />
+          {/* Admin */}
+          <Route path="admin/service-department" element={<ServiceDepartmentMaster />} />
+          <Route path="admin/service-type" element={<ServiceTypeMaster />} />
+          <Route path="admin/status-master" element={<StatusMaster />} />
+          <Route path="admin/service-department-person" element={<ServiceDepartmentPersonMaster />} />
+          <Route path="admin/service-request-type" element={<ServiceRequestTypeMaster />} />
+          <Route path="admin/service-request-type-wise-person" element={<ServiceRequestTypeWisePerson />} />
 
-        {/* Forms */}
-        <Route path="/request/add" element={<AddRequestForm />} />
-        <Route path="/request/edit" element={<EditRequestForm />} />
+          {/* Forms */}
+          <Route path="request/add" element={<AddRequestForm />} />
+          <Route path="request/edit" element={<EditRequestForm />} />
+          <Route path="requestlist" element={<Requestlist />} />
+        </Route>
 
+        {/* 404 */}
         <Route path="*" element={<Notfound />} />
-
-
 
       </Routes>
     </BrowserRouter>

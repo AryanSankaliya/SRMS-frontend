@@ -37,7 +37,7 @@ export default function Sidebar() {
           <SidebarLink icon={LayoutDashboard} text="Dashboard" to="/" />
           <SidebarLink icon={ClipboardList} text="Service Requests" to="/user" />
           <SidebarLink icon={PlusCircle} text="New Request" to="/request/add" />
-          <SidebarLink icon={BarChart3} text="Reports" to="/reports" />
+          <SidebarLink icon={BarChart3} text="All Request" to="/requestlist" />
           <SidebarLink icon={Bell} text="Notifications" to="/notifications" />
 
           {/* Divider */}

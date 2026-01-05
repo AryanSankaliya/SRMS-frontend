@@ -8,6 +8,14 @@ import { useNavigate } from 'react-router-dom';
 function Login() {
   const navigate = useNavigate()
   const [activeRole, setActiveRole] = useState("Admin")
+
+  localStorage.setItem(
+  "user",
+  JSON.stringify({
+    userName: "Aryan",
+    role: "Admin" // User | Tech | Admin
+  })
+);
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#F2F8FF] to-[#FFFFFF] flex w-full">
 
@@ -132,7 +140,8 @@ function Login() {
             </a>
           </div>
 
-          <button className="w-full bg-gradient-to-tr from-blue-400 to-teal-500 text-white py-2 rounded-lg hover:opacity-90 transition">
+          <button 
+          className="w-full bg-gradient-to-tr from-blue-400 to-teal-500 text-white py-2 rounded-lg hover:opacity-90 transition">
             Sign In
           </button>
 

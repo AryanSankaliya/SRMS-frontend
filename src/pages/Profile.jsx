@@ -10,10 +10,9 @@ import {
 } from "lucide-react";
 import Dashboard from "./Dashboard";
 
-function UserProfile() {
+function Profile() {
   return (
     <>
-    <Dashboard>
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md grid grid-cols-1 md:grid-cols-3 overflow-hidden">
 
@@ -164,9 +163,8 @@ function UserProfile() {
         </div>
       </div>
     </div>
-    </Dashboard>
     </>
   );
 }
 
-export default UserProfile;
+export default Profile;
