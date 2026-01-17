@@ -11,21 +11,24 @@ import {
 import Requestlist from "../components/Requestlist";
 
 export default function Dashboard() {
-  
-  const role = "tech";
-  // "user" | "tech" | "admin"
+
+  // ✅ GET ROLE FROM LOGIN
+  const user = JSON.parse(localStorage.getItem("user"));
+  const role = user?.role || "User"; 
+  // "User" | "Technician" | "Hod"
+
   const dashboardConfig = {
-    user: {
+    User: {
       stats: ["pending", "closed"],
       showRequests: true,
       showNotifications: true,
     },
-    tech: {
+    Technician: {
       stats: ["pending", "inProgress", "closed"],
       showRequests: true,
       showNotifications: true,
     },
-    admin: {
+    Hod: {
       stats: ["total", "pending", "inProgress", "closed"],
       showRequests: true,
       showNotifications: true,
@@ -64,7 +67,7 @@ export default function Dashboard() {
     },
   ];
 
-  // 🔔 NOTIFICATIONS
+  // 🔔 NOTIFICATIONS (STATIC FOR NOW)
   const notifications = [
     {
       id: 1,
@@ -99,43 +102,25 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
 
-      {/* STATS */}
+      {/* 📊 STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats
-          .filter((s) => dashboardConfig[role].stats.includes(s.id))
+          .filter((s) => dashboardConfig[role]?.stats.includes(s.id))
           .map((stat) => {
             const Icon = stat.icon;
             return (
               <div
                 key={stat.id}
-                className="
-            group
-            bg-white rounded-xl p-6 border
-            shadow-sm
-            transition-all duration-300 ease-in-out
-            hover:-translate-y-1.5
-            hover:shadow-xl
-            hover:border-blue-500/40
-          "
+                className="bg-white rounded-xl p-6 border shadow-sm hover:-translate-y-1 hover:shadow-xl transition"
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm text-gray-500 transition-colors duration-300 group-hover:text-gray-700">
-                      {stat.title}
-                    </p>
+                    <p className="text-sm text-gray-500">{stat.title}</p>
                     <p className="text-3xl font-bold text-gray-800">
                       {stat.count}
                     </p>
                   </div>
-
-                  <div
-                    className={`
-                p-3 rounded-lg ${stat.color}
-                transition-transform duration-300
-                group-hover:scale-110
-                group-hover:rotate-6
-              `}
-                  >
+                  <div className={`p-3 rounded-lg ${stat.color}`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
                 </div>
@@ -144,15 +129,15 @@ export default function Dashboard() {
           })}
       </div>
 
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* REQUEST LIST */}
-        {dashboardConfig[role].showRequests && (
+
+        {/* 📋 REQUEST LIST */}
+        {dashboardConfig[role]?.showRequests && (
           <div className="lg:col-span-2 bg-white rounded-xl shadow border p-4">
             <h2 className="text-lg font-semibold mb-3">
-              {role === "user"
+              {role === "User"
                 ? "My Requests"
-                : role === "tech"
+                : role === "Technician"
                   ? "Assigned Requests"
                   : "All Requests"}
             </h2>
@@ -160,8 +145,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* NOTIFICATIONS */}
-        {dashboardConfig[role].showNotifications && (
+        {/* 🔔 NOTIFICATIONS */}
+        {dashboardConfig[role]?.showNotifications && (
           <div className="bg-white rounded-xl shadow border p-6">
             <h2 className="text-lg font-semibold mb-4">
               Notifications

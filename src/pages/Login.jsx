@@ -7,15 +7,33 @@ import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const navigate = useNavigate()
-  const [activeRole, setActiveRole] = useState("Admin")
+  const [activeRole, setActiveRole] = useState("Hod")
 
-  localStorage.setItem(
-  "user",
-  JSON.stringify({
-    userName: "Aryan",
-    role: "Admin" // User | Tech | Admin
-  })
-);
+  const STATIC_EMAIL = "";
+  const STATIC_PASSWORD = "";
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    if (email !== STATIC_EMAIL || password !== STATIC_PASSWORD) {
+      return;
+    }
+
+    const userData = {
+      userName: "Aryan",
+      role: activeRole, // 🔥 Admin | Student | Technician
+      isLoggedIn: true
+    };
+
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    navigate("/dashboard");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#F2F8FF] to-[#FFFFFF] flex w-full">
 
@@ -70,24 +88,24 @@ function Login() {
             <p className="mb-2 text-gray-700">Select Your Role</p>
             <div className="flex gap-4">
               <button type="button"
-                onClick={() => setActiveRole("Admin")}
+                onClick={() => setActiveRole("Hod")}
                 className={`flex-1 border rounded-lg py-2 px-4 flex flex-col items-center justify-center gap-2 text-gray-700 transition-All duration-300 cursor-pointer 
-                ${activeRole === "Admin"
+                ${activeRole === "Hod"
                     ? "bg-green-100 border-green-500 text-green-950 shadow-md"
                     : "border-gray-300 text-gray-700 hover:bg-green-100 hover:border-green-400 hover:text-green-950"
                   }`}>
                 <FaUserCircle className='text-4xl' />
-                <span className="material-icons">Admin</span>
+                <span className="material-icons">Hod</span>
               </button>
               <button type="button"
-                onClick={() => setActiveRole("Student")}
+                onClick={() => setActiveRole("User")}
                 className={`flex-1 border rounded-lg py-2 px-4 flex flex-col items-center justify-center gap-2 text-gray-700 transition-All duration-300 cursor-pointer 
-                ${activeRole === "Student"
+                ${activeRole === "User"
                     ? "bg-green-100 border-green-500 text-green-950 shadow-md"
                     : "border-gray-300 text-gray-700 hover:bg-green-100 hover:border-green-400 hover:text-green-950"
                   }`}>
                 <FaUserCircle className='text-4xl' />
-                <span className="material-icons">Student</span>
+                <span className="material-icons">User</span>
               </button>
               <button type="button"
                 onClick={() => setActiveRole("Technician")}
@@ -95,7 +113,7 @@ function Login() {
                 ${activeRole === "Technician"
                     ? "bg-green-100 border-green-500 text-green-950 shadow-md"
                     : "border-gray-300 text-gray-700 hover:bg-green-100 hover:border-green-400 hover:text-green-950"
-                  }`}> 
+                  }`}>
                 <FaUserCircle className='text-4xl' />
                 <span className="material-icons">Technician</span>
               </button>
@@ -112,6 +130,7 @@ function Login() {
               <input
                 type="email"
                 placeholder="Enter your email"
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full border rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-400 box-border"
               />
             </div>
@@ -125,6 +144,7 @@ function Login() {
               <input
                 type="password"
                 placeholder="Enter your password"
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full border rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-400 box-border"
               />
             </div>
@@ -140,10 +160,13 @@ function Login() {
             </a>
           </div>
 
-          <button 
-          className="w-full bg-gradient-to-tr from-blue-400 to-teal-500 text-white py-2 rounded-lg hover:opacity-90 transition">
+          <button
+            onClick={handleLogin}
+            className="w-full bg-gradient-to-tr from-blue-400 to-teal-500 text-white py-2 rounded-lg hover:opacity-90 transition"
+          >
             Sign In
           </button>
+
 
           <p className="text-center text-gray-400 text-sm">© 2025 Service Request Management System. All rights reserved.</p>
         </form>

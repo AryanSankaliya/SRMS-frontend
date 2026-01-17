@@ -29,6 +29,9 @@ import AddRequestForm from "./components/AddRequestForm";
 import EditRequestForm from "./components/EditRequestForm";
 import Notfound from "./pages/Notfound";
 import Requestlist from "./components/Requestlist";
+import DashboardRedirect from "./pages/DashboardRedirect";
+import AssignToTech from "./components/AssignToTech";
+import MasterPages from "./pages/MasterPages";
 
 function App() {
   return (
@@ -45,17 +48,39 @@ function App() {
           <Route path="/profile" element={<Profile />} />
 
           {/* Roles */}
-          <Route path="user" element={<User />} />
-          <Route path="hod" element={<Hod />} />
-          <Route path="tech" element={<Tech />} />
+          <Route path="/dashboard" element={<DashboardRedirect />} />
+          <Route path="/technician/dashboard" element={<Dashboard />} />
+
+          {/* Sidebar */}
+
+          {/* hod */}
+          <Route path="/hod/dashboard" element={<Dashboard />} />
+          <Route path="/hod/assign" element={<AssignToTech role="hod" />} />
+          <Route path="/hod/requestlist" element={<Requestlist />} />
+          <Route path="/hod/masterPages" element={<MasterPages />} />
+
+
+
+          {/* user */}
+          <Route path="/user/dashboard" element={<Dashboard />} />
+          <Route path="/user/request/add" element={<AddRequestForm />} />
+          <Route path="/user/requestlist" element={<AssignToTech role="user" />} />
+
+          {/* technician */}
+          <Route path="/technician/dashboard" element={<Dashboard />} />
+          <Route path="/technician/requests" element={<AssignToTech role="technician" />} />
+
 
           {/* Admin */}
-          <Route path="admin/service-department" element={<ServiceDepartmentMaster />} />
-          <Route path="admin/service-type" element={<ServiceTypeMaster />} />
-          <Route path="admin/status-master" element={<StatusMaster />} />
-          <Route path="admin/service-department-person" element={<ServiceDepartmentPersonMaster />} />
-          <Route path="admin/service-request-type" element={<ServiceRequestTypeMaster />} />
-          <Route path="admin/service-request-type-wise-person" element={<ServiceRequestTypeWisePerson />} />
+          <Route path="/hod/masterPages/*" element={<MasterPages />}>
+            <Route index element={<ServiceDepartmentMaster />} /> {/* default tab */}
+            <Route path="service-department" element={<ServiceDepartmentMaster />} />
+            <Route path="service-department-person" element={<ServiceDepartmentPersonMaster />} />
+            <Route path="service-request-type" element={<ServiceRequestTypeMaster />} />
+            <Route path="service-request-type-wise-person" element={<ServiceRequestTypeWisePerson />} />
+            <Route path="service-type" element={<ServiceTypeMaster />} />
+            <Route path="status-master" element={<StatusMaster />} />
+          </Route>
 
           {/* Forms */}
           <Route path="request/add" element={<AddRequestForm />} />

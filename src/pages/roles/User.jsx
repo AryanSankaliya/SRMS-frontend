@@ -5,8 +5,6 @@ function User() {
   return (
     <>
       <AddRequestForm />
-      
-
     </>
 
   );
