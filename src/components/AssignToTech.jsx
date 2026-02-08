@@ -7,16 +7,16 @@ function StatusTable({ role }) {
     const [selectedReq, setSelectedReq] = useState(null);
     const [selectedTech, setSelectedTech] = useState("");
 
-    const data = [
+    const [data, setData] = useState([
         {
             id: "#REQ-1024",
             title: "Lab PC Hardware Issue",
             type: "Hardware",
             typeBg: "bg-blue-100",
             typeText: "text-blue-600",
-            status: "Open",
-            statusBg: "bg-green-100",
-            statusText: "text-green-600",
+            status: "Pending",
+            statusBg: "bg-yellow-100",
+            statusText: "text-yellow-600",
             date: "Oct 24, 2023"
         },
         {
@@ -36,13 +36,12 @@ function StatusTable({ role }) {
             type: "Hardware",
             typeBg: "bg-blue-100",
             typeText: "text-blue-600",
-            status: "Open",
-            statusBg: "bg-green-100",
-            statusText: "text-green-600",
+            status: "Pending",
+            statusBg: "bg-yellow-100",
+            statusText: "text-yellow-600",
             date: "Oct 18, 2023"
         }
-
-    ]
+    ]);
 
     const handleAssignClick = (req) => {
         setSelectedReq(req);
@@ -50,6 +49,20 @@ function StatusTable({ role }) {
     };
 
     const handleTechAssign = () => {
+        // Update the specific request in the state
+        setData((prevData) =>
+            prevData.map((item) =>
+                item.id === selectedReq.id
+                    ? {
+                        ...item,
+                        status: `Assigned to ${selectedTech}`,
+                        statusBg: "bg-indigo-100",
+                        statusText: "text-indigo-600",
+                    }
+                    : item
+            )
+        );
+
         console.log(`Request ${selectedReq.id} assigned to ${selectedTech}`);
         setAssignModal(false);
         setSelectedReq(null);
@@ -87,10 +100,13 @@ function StatusTable({ role }) {
                     {role === "hod" && (
                         <div>
                             <button
-                                className="bg-teal-500 text-white px-3 py-1 rounded hover:bg-teal-600"
+                                className={`px-3 py-1 rounded transition ${item.status.includes("Assigned")
+                                    ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                    : "bg-teal-500 text-white hover:bg-teal-600"
+                                    }`}
                                 onClick={() => handleAssignClick(item)}
                             >
-                                Assign
+                                {item.status.includes("Assigned") ? "Reassign" : "Assign"}
                             </button>
                         </div>
                     )}

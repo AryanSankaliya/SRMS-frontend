@@ -9,11 +9,11 @@ function Requestlist() {
     const [searchTerm, setSearchTerm] = useState('');
     // status manu 
     const [statusFilter, setStatusFilter] = useState("All");
-
+    const [data, setData] = useState([]);
 
     const role = "student";
 
-    const data = [
+    const defaultData = [
         {
             id: "#REQ-1024",
             title: "Lab PC Hardware Issue",
@@ -47,8 +47,17 @@ function Requestlist() {
             statusText: "text-green-600",
             date: "Oct 18, 2023"
         }
+    ];
 
-    ]
+    React.useEffect(() => {
+        const storedRequests = localStorage.getItem("requests");
+        if (storedRequests) {
+            setData(JSON.parse(storedRequests));
+        } else {
+            localStorage.setItem("requests", JSON.stringify(defaultData));
+            setData(defaultData);
+        }
+    }, []);
 
     const filteredData = data.filter(item => {
         const matchesStatus =

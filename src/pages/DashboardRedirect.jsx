@@ -4,18 +4,18 @@ const DashboardRedirect = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   if (!user || !user.isLoggedIn) {
-    return <Navigate to="/login"  />;
+    return <Navigate to="/login" replace />;
   }
 
   switch (user.role) {
     case "Hod":
-      return <Navigate to="/hod/dashboard"  />;
+      return <Navigate to="/hod/dashboard" replace />;
     case "User":
-      return <Navigate to="/user/dashboard"  />;
+      return <Navigate to="/user/dashboard" replace />;
     case "Technician":
-      return <Navigate to="/technician/dashboard"  />;
+      return <Navigate to="/technician/dashboard" replace />;
     default:
-      return <Navigate to="/login" relace />;
+      return <Navigate to="/login" replace />;
   }
 };
 
