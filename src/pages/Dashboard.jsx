@@ -5,16 +5,15 @@ import {
   CheckCircle,
   Bell,
   AlertTriangle,
-  Info
+  Info,
 } from "lucide-react";
 
 import Requestlist from "../components/Requestlist";
 
 export default function Dashboard() {
-
   // ✅ GET ROLE FROM LOGIN
   const user = JSON.parse(localStorage.getItem("user"));
-  const role = user?.role || "User"; 
+  const role = user?.role || "User";
   // "User" | "Technician" | "Hod"
 
   const dashboardConfig = {
@@ -101,7 +100,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-
       {/* 📊 STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats
@@ -130,27 +128,20 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
         {/* 📋 REQUEST LIST */}
         {dashboardConfig[role]?.showRequests && (
           <div className="lg:col-span-2 bg-white rounded-xl shadow border p-4">
             <h2 className="text-lg font-semibold mb-3">
-              {role === "User"
-                ? "My Requests"
-                : role === "Technician"
-                  ? "Assigned Requests"
-                  : "All Requests"}
+              {role === "User" ? "My Requests" : "All Requests"}
             </h2>
-            <Requestlist />
+            <Requestlist role={role} />
           </div>
         )}
 
         {/* 🔔 NOTIFICATIONS */}
         {dashboardConfig[role]?.showNotifications && (
           <div className="bg-white rounded-xl shadow border p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              Notifications
-            </h2>
+            <h2 className="text-lg font-semibold mb-4">Notifications</h2>
             <div className="space-y-4">
               {notifications.map((n) => {
                 const Icon = n.icon;
@@ -164,9 +155,7 @@ export default function Dashboard() {
                       <p className="text-sm font-medium text-gray-800">
                         {n.message}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        {n.time}
-                      </p>
+                      <p className="text-xs text-gray-500">{n.time}</p>
                     </div>
                   </div>
                 );

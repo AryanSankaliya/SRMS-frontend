@@ -5,6 +5,8 @@ import { FaEnvelope, FaLock, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import api from "../../src/services/api";
 
+import toast from "react-hot-toast";
+
 function Login() {
   const navigate = useNavigate();
   const [activeRole, setActiveRole] = useState("Hod");
@@ -25,13 +27,18 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await api.post("/staff/login", {
+      let endpoint = "/staff/login";
+      if (activeRole === "User") {
+        endpoint = "/student/login";
+      }
+
+      const response = await api.post(endpoint, {
         email: email,
         password: password,
       });
 
       if (response.data.error) {
-        alert("Login Failed: " + response.data.message);
+        toast.error(response.data.message);
         setLoading(false);
         return;
       }
@@ -40,7 +47,9 @@ function Login() {
       let systemRole = "User";
 
       // Map backend designation to frontend role
-      if (user.designation === "Admin" || user.designation === "HOD") {
+      if (activeRole === "User") {
+        systemRole = "User"; // Student is treated as User
+      } else if (user.designation === "Admin" || user.designation === "HOD") {
         systemRole = "Hod";
       } else if (
         user.designation &&
@@ -59,6 +68,9 @@ function Login() {
 
       localStorage.setItem("user", JSON.stringify(userData));
 
+      toast.success("Login Successful!");
+
+      // Redirect based on mapped role
       // Redirect based on mapped role
       if (systemRole === "Hod") {
         navigate("/hod/dashboard");
@@ -70,9 +82,9 @@ function Login() {
     } catch (error) {
       console.error("Login Error:", error);
       if (error.response && error.response.data && error.response.data.message) {
-        alert("Login Failed: " + error.response.data.message);
+        toast.error(error.response.data.message);
       } else {
-        alert("Server Error! Make sure Backend is running.");
+        toast.error("Server Error! Make sure Backend is running.");
       }
     } finally {
       setLoading(false);
@@ -190,6 +202,19 @@ function Login() {
           <p className="text-center text-gray-400 text-sm">
             © 2025 Service Request Management System. All rights reserved.
           </p>
+
+          {/* Register Link for Students */}
+          <div className="text-center mt-4">
+            <p className="text-gray-600 text-sm">
+              Are you a student?{" "}
+              <span
+                className="text-blue-500 hover:underline cursor-pointer"
+                onClick={() => navigate("/register")}
+              >
+                Register here
+              </span>
+            </p>
+          </div>
         </form>
       </div>
     </div>

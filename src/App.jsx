@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 /* Auth */
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 
 /* Layout */
@@ -28,9 +29,12 @@ import EditRequestForm from "./components/EditRequestForm";
 import Requestlist from "./components/Requestlist";
 import AssignToTech from "./components/AssignToTech";
 
+import { Toaster } from "react-hot-toast";
+
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
       <Routes>
 
         {/*  Open → Login */}
@@ -38,6 +42,7 @@ function App() {
 
         {/*  Auth */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/*  Layout (NO auth for now) */}
@@ -50,6 +55,9 @@ function App() {
           <Route path="user/dashboard" element={<Dashboard />} />
           <Route path="user/request/add" element={<AddRequestForm />} />
           <Route path="user/requestlist" element={<Requestlist />} />
+
+          {/* Student */}
+          <Route path="student/dashboard" element={<Dashboard />} />
 
           {/* HOD */}
           <Route path="hod/dashboard" element={<Dashboard />} />
