@@ -29,7 +29,7 @@ function Login() {
     try {
       let endpoint = "/staff/login";
       if (activeRole === "User") {
-        endpoint = "/student/login";
+        endpoint = "/user/login";
       }
 
       const response = await api.post(endpoint, {
@@ -48,7 +48,7 @@ function Login() {
 
       // Map backend designation to frontend role
       if (activeRole === "User") {
-        systemRole = "User"; // Student is treated as User
+        systemRole = "User"; // Student/User is treated as User
       } else if (user.designation === "Admin" || user.designation === "HOD") {
         systemRole = "Hod";
       } else if (
@@ -203,10 +203,10 @@ function Login() {
             © 2025 Service Request Management System. All rights reserved.
           </p>
 
-          {/* Register Link for Students */}
+          {/* Register Link for Users */}
           <div className="text-center mt-4">
             <p className="text-gray-600 text-sm">
-              Are you a student?{" "}
+              Are you a new user?{" "}
               <span
                 className="text-blue-500 hover:underline cursor-pointer"
                 onClick={() => navigate("/register")}

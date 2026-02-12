@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import api from "../../src/services/api"; 
+import api from "../../src/services/api";
 
 function AddRequestForm() {
   const navigate = useNavigate();
 
   // Form State
   const [title, setTitle] = useState("");
-  const [selectedTypeId, setSelectedTypeId] = useState(""); 
+  const [selectedTypeId, setSelectedTypeId] = useState("");
   const [department, setDepartment] = useState("");
   const [priority, setPriority] = useState("");
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [requestTypes, setRequestTypes] = useState([]); 
+  const [requestTypes, setRequestTypes] = useState([]);
   const [errors, setErrors] = useState({});
 
   // Departments List (Abhi static rakhte hain)
@@ -31,7 +31,7 @@ function AddRequestForm() {
   useEffect(() => {
     const fetchTypes = async () => {
       try {
-        const response = await api.get("/requesttype/"); 
+        const response = await api.get("/requesttype/");
         if (!response.data.error) {
           setRequestTypes(response.data.data);
         }
@@ -83,14 +83,15 @@ function AddRequestForm() {
 
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      
+
       const payload = {
-        serviceRequestTypeId: selectedTypeId, 
+        serviceRequestTypeId: selectedTypeId,
         serviceRequestTitle: title,
         serviceRequestDescription: description,
-        priority: priority, 
-        department: department, 
-        createdByUserId: user?._id || "self" 
+        priority: priority,
+        department: department,
+        createdByUserId: user?._id || "self",
+        userId: user?._id // Adding userId to match the renamed field in ServiceRequest model
       };
 
       const response = await api.post("/request/", payload);
@@ -99,7 +100,7 @@ function AddRequestForm() {
         toast.error("Error: " + response.data.message);
       } else {
         toast.success("Request Created & Auto-Assigned!");
-        navigate("/user/requestlist"); 
+        navigate("/user/requestlist");
       }
 
     } catch (error) {
@@ -152,7 +153,7 @@ function AddRequestForm() {
             {/* Backend se aayi list map kar rahe hain */}
             {requestTypes.map((type) => (
               <option key={type._id} value={type._id}>
-                {type.serviceRequestTypeName} 
+                {type.serviceRequestTypeName}
               </option>
             ))}
           </select>

@@ -9,7 +9,7 @@ function ServiceTypeMaster() {
             description: "Technical related service requests",
             sequence: 1,
             isForStaff: true,
-            isForStudent: true
+            isForUser: true
         },
         {
             id: 2,
@@ -17,7 +17,7 @@ function ServiceTypeMaster() {
             description: "Facility and maintenance services",
             sequence: 2,
             isForStaff: true,
-            isForStudent: false
+            isForUser: false
         },
         {
             id: 3,
@@ -25,7 +25,7 @@ function ServiceTypeMaster() {
             description: "Administrative support services",
             sequence: 3,
             isForStaff: false,
-            isForStudent: true
+            isForUser: true
         }
     ];
 
@@ -48,7 +48,7 @@ function ServiceTypeMaster() {
                 <div>Description</div>
                 <div>Sequence</div>
                 <div>Is For Staff</div>
-                <div>Is For Student</div>
+                <div>Is For User</div>
                 <div>Action</div>
             </div>
 
@@ -62,7 +62,7 @@ function ServiceTypeMaster() {
                     <div>{item.description}</div>
                     <div>{item.sequence}</div>
                     <div>{item.isForStaff ? "Yes" : "No"}</div>
-                    <div>{item.isForStudent ? "Yes" : "No"}</div>
+                    <div>{item.isForUser ? "Yes" : "No"}</div>
                     <div>
                         <button className="text-teal-600 hover:underline">
                             Edit

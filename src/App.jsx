@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import DashboardRedirect from "./pages/DashboardRedirect";
 import Notfound from "./pages/Notfound";
 import MasterPages from "./pages/MasterPages";
+import RequestDetails from "./pages/RequestDetails"
 
 /* Admin */
 import ServiceDepartmentMaster from "./pages/admin/ServiceDepartmentMaster";
@@ -56,8 +57,7 @@ function App() {
           <Route path="user/request/add" element={<AddRequestForm />} />
           <Route path="user/requestlist" element={<Requestlist />} />
 
-          {/* Student */}
-          <Route path="student/dashboard" element={<Dashboard />} />
+
 
           {/* HOD */}
           <Route path="hod/dashboard" element={<Dashboard />} />
@@ -82,6 +82,7 @@ function App() {
           {/* Forms */}
           <Route path="request/add" element={<AddRequestForm />} />
           <Route path="request/edit" element={<EditRequestForm />} />
+          <Route path="/request-details/:id" element={<RequestDetails />} />
         </Route>
 
         {/*  404 */}

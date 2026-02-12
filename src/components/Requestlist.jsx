@@ -2,30 +2,36 @@ import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import StatusDropdown from "./StatusDropdown";
 import StatusTable from "./StatusTable";
-import api from "../../src/services/api"; 
+import api from "../../src/services/api";
 
-function Requestlist({ role }) { 
+function Requestlist({ role }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
   const getStatusStyle = (status) => {
     const s = status?.toLowerCase() || "";
-    if (s.includes("assigned")) return { bg: "bg-blue-100", text: "text-blue-600" };
-    if (s.includes("pending")) return { bg: "bg-yellow-100", text: "text-yellow-600" };
-    if (s.includes("resolved") || s.includes("closed")) return { bg: "bg-green-100", text: "text-green-600" };
-    if (s.includes("rejected")) return { bg: "bg-red-100", text: "text-red-600" };
+    if (s.includes("assigned"))
+      return { bg: "bg-blue-100", text: "text-blue-600" };
+    if (s.includes("pending"))
+      return { bg: "bg-yellow-100", text: "text-yellow-600" };
+    if (s.includes("resolved") || s.includes("closed"))
+      return { bg: "bg-green-100", text: "text-green-600" };
+    if (s.includes("rejected"))
+      return { bg: "bg-red-100", text: "text-red-600" };
     return { bg: "bg-gray-100", text: "text-gray-600" };
   };
 
   const getTypeStyle = (type) => {
     const t = type?.toLowerCase() || "";
-    if (t.includes("hardware")) return { bg: "bg-purple-100", text: "text-purple-600" };
-    if (t.includes("software")) return { bg: "bg-pink-100", text: "text-pink-600" };
-    if (t.includes("network")) return { bg: "bg-indigo-100", text: "text-indigo-600" };
+    if (t.includes("hardware"))
+      return { bg: "bg-purple-100", text: "text-purple-600" };
+    if (t.includes("software"))
+      return { bg: "bg-pink-100", text: "text-pink-600" };
+    if (t.includes("network"))
+      return { bg: "bg-indigo-100", text: "text-indigo-600" };
     return { bg: "bg-gray-100", text: "text-gray-800" };
   };
 
@@ -45,25 +51,30 @@ function Requestlist({ role }) {
             filteredTickets = allTickets.filter(
               (ticket) =>
                 ticket.assignedToUserId?._id === user._id ||
-                ticket.assignedToUserId === user._id
+                ticket.assignedToUserId === user._id,
             );
           } else {
             filteredTickets = allTickets.filter(
               (ticket) =>
                 ticket.createdByUserId === user._id ||
-                ticket.createdByUserId?._id === user._id
+                ticket.createdByUserId?._id === user._id,
             );
           }
 
           const formattedData = filteredTickets.map((ticket) => {
-            const typeName = ticket.serviceRequestTypeId?.serviceRequestTypeName || "General";
-            const statusName = ticket.serviceRequestStatusId?.serviceRequestStatusName || "Pending";
-            
+            const typeName =
+              ticket.serviceRequestTypeId?.serviceRequestTypeName || "General";
+            const statusName =
+              ticket.serviceRequestStatusId?.serviceRequestStatusName ||
+              "Pending";
+
             const typeStyle = getTypeStyle(typeName);
             const statusStyle = getStatusStyle(statusName);
 
             return {
-              id: ticket.serviceRequestNo || `#${ticket._id.slice(-6).toUpperCase()}`,
+              id: ticket.serviceRequestNo
+                ? `#${ticket.serviceRequestNo.slice(-6)}`
+                : `#${ticket._id.slice(-6).toUpperCase()}`,
               title: ticket.serviceRequestTitle,
               type: typeName,
               typeBg: typeStyle.bg,
@@ -72,11 +83,13 @@ function Requestlist({ role }) {
               statusBg: statusStyle.bg,
               statusText: statusStyle.text,
               date: new Date(ticket.createdAt).toLocaleDateString("en-US", {
-                 year: 'numeric', month: 'short', day: 'numeric'
-              })
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              }),
+              fullData: ticket,
             };
           });
-
           setData(formattedData.reverse());
         }
       } catch (error) {
@@ -87,7 +100,7 @@ function Requestlist({ role }) {
     };
 
     fetchData();
-  }, [role]); 
+  }, [role]);
 
   const filteredData = data.filter((item) => {
     const matchesStatus =

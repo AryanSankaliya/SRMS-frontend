@@ -40,7 +40,8 @@ function Register() {
             // Exclude confirmPassword before sending
             const { confirmPassword, ...registerData } = formData;
 
-            const response = await api.post("/student/register", registerData);
+            // 3. Register endpoint change
+            const response = await api.post("/user/register", registerData);
 
             if (response.data.error) {
                 toast.error("Registration Failed: " + response.data.message);
@@ -86,7 +87,7 @@ function Register() {
             {/* Right Section */}
             <div className="w-1/2 flex items-center justify-center py-10">
                 <form className="w-full max-w-xl bg-white rounded-lg p-8 shadow-lg space-y-4">
-                    <h4 className="text-2xl font-semibold">Student Registration</h4>
+                    <h4 className="text-2xl font-semibold">User Registration</h4>
                     <p className="text-gray-600">Create your account to get started</p>
 
                     <div className="flex gap-4">
