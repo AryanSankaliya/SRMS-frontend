@@ -1,153 +1,102 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import StatusTable from "./StatusTable";
+import api from "../services/api";
 
-const techList = ["Tech A", "Tech B", "Tech C"];
+function AssignToTech({ role }) {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-function StatusTable({ role }) {
-    const [assignModal, setAssignModal] = useState(false);
-    const [selectedReq, setSelectedReq] = useState(null);
-    const [selectedTech, setSelectedTech] = useState("");
-
-    const [data, setData] = useState([
-        {
-            id: "#REQ-1024",
-            title: "Lab PC Hardware Issue",
-            type: "Hardware",
-            typeBg: "bg-blue-100",
-            typeText: "text-blue-600",
-            status: "Pending",
-            statusBg: "bg-yellow-100",
-            statusText: "text-yellow-600",
-            date: "Oct 24, 2023"
-        },
-        {
-            id: "#REQ-1025",
-            title: "Software License Renewal",
-            type: "Software",
-            typeBg: "bg-purple-100",
-            typeText: "text-purple-600",
-            status: "Pending",
-            statusBg: "bg-yellow-100",
-            statusText: "text-yellow-600",
-            date: "Oct 22, 2023"
-        },
-        {
-            id: "#REQ-1020",
-            title: "Projector Bulb Replacement",
-            type: "Hardware",
-            typeBg: "bg-blue-100",
-            typeText: "text-blue-600",
-            status: "Pending",
-            statusBg: "bg-yellow-100",
-            statusText: "text-yellow-600",
-            date: "Oct 18, 2023"
-        }
-    ]);
-
-    const handleAssignClick = (req) => {
-        setSelectedReq(req);
-        setAssignModal(true);
+    // Helper functions for styling (Same as RequestList to maintain consistency)
+    const getStatusStyle = (status) => {
+        const s = status?.toLowerCase() || "";
+        if (s.includes("assigned")) return { bg: "bg-blue-100", text: "text-blue-600" };
+        if (s.includes("pending")) return { bg: "bg-yellow-100", text: "text-yellow-600" };
+        if (s.includes("resolved") || s.includes("closed")) return { bg: "bg-green-100", text: "text-green-600" };
+        if (s.includes("rejected")) return { bg: "bg-red-100", text: "text-red-600" };
+        return { bg: "bg-gray-100", text: "text-gray-600" };
     };
 
-    const handleTechAssign = () => {
-        // Update the specific request in the state
-        setData((prevData) =>
-            prevData.map((item) =>
-                item.id === selectedReq.id
-                    ? {
-                        ...item,
-                        status: `Assigned to ${selectedTech}`,
-                        statusBg: "bg-indigo-100",
-                        statusText: "text-indigo-600",
+    const getTypeStyle = (type) => {
+        const t = type?.toLowerCase() || "";
+        if (t.includes("hardware")) return { bg: "bg-purple-100", text: "text-purple-600" };
+        if (t.includes("software")) return { bg: "bg-pink-100", text: "text-pink-600" };
+        if (t.includes("network")) return { bg: "bg-indigo-100", text: "text-indigo-600" };
+        return { bg: "bg-gray-100", text: "text-gray-800" };
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const user = JSON.parse(localStorage.getItem("user"));
+                const response = await api.get("/request/"); // Fetch all requests
+
+                if (!response.data.error) {
+                    let allTickets = response.data.data;
+
+                    // Filter Logic based on Role
+                    if (role === "technician") {
+                        // Technicians see assigned to them? Or maybe available to pick? 
+                        // Usually for 'AssignToTech' page, it implies a Manager/HOD assigning to techs.
+                        // If this component is reused for Technician dashboard to see their requests:
+                        allTickets = allTickets.filter(t => t.assignedToUserId?._id === user._id);
                     }
-                    : item
-            )
-        );
+                    // If HOD, they usually see all tickets in their department or all tickets generally.
+                    // Assuming HOD sees all for now as per previous RequestList logic.
 
-        console.log(`Request ${selectedReq.id} assigned to ${selectedTech}`);
-        setAssignModal(false);
-        setSelectedReq(null);
-        setSelectedTech("");
-    };
+                    const formattedData = allTickets.map((ticket) => {
+                        const typeName = ticket.serviceRequestTypeId?.serviceRequestTypeName || "General";
+                        const statusName = ticket.serviceRequestStatusId?.serviceRequestStatusName || "Pending";
+                        const typeStyle = getTypeStyle(typeName);
+                        const statusStyle = getStatusStyle(statusName);
+
+                        return {
+                            id: ticket.serviceRequestNo ? `#${ticket.serviceRequestNo.slice(-6)}` : `#${ticket._id.slice(-6).toUpperCase()}`,
+                            title: ticket.serviceRequestTitle,
+                            type: typeName,
+                            typeBg: typeStyle.bg,
+                            typeText: typeStyle.text,
+                            status: statusName,
+                            statusBg: statusStyle.bg,
+                            statusText: statusStyle.text,
+                            date: new Date(ticket.createdAt).toLocaleDateString("en-US", {
+                                year: "numeric", month: "short", day: "numeric",
+                            }),
+                            fullData: ticket,
+                        };
+                    });
+
+                    setData(formattedData.reverse());
+                }
+            } catch (error) {
+                console.error("Error loading requests:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [role]);
 
     return (
-        <div className="bg-white rounded-3xl shadow-md p-6 w-full mt-5">
-            {/* Header */}
-            <div className={`grid ${role === "hod" ? "grid-cols-6" : "grid-cols-5"} text-sm text-teal-600 font-semibold pb-4 border-b`}>
-                <div>REQUEST NO</div>
-                <div>TITLE</div>
-                <div>TYPE</div>
-                <div>STATUS</div>
-                <div>DATE</div>
-                {role === "hod" && <div>ASSIGN</div>}
+        <>
+            <div className="w-full flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-800">
+                    {role === 'technician' ? 'My Assigned Requests' : 'Assign Requests to Technicians'}
+                </h2>
             </div>
 
-            {/* Rows */}
-            {data.map((item, index) => (
-                <div key={index} className={`grid ${role === "hod" ? "grid-cols-6" : "grid-cols-5"} items-center py-4 border-b last:border-none hover:bg-gray-50 transition`}>
-                    <div className="font-medium text-gray-800">{item.id}</div>
-                    <div className="font-semibold text-gray-900">{item.title}</div>
-                    <div>
-                        <span className={`px-3 py-1 text-sm rounded-full ${item.typeBg} ${item.typeText}`}>
-                            {item.type}
-                        </span>
-                    </div>
-                    <div>
-                        <span className={`px-3 py-1 text-sm rounded-full ${item.statusBg} ${item.statusText}`}>
-                            {item.status}
-                        </span>
-                    </div>
-                    <div className="text-gray-600">{item.date}</div>
-                    {role === "hod" && (
-                        <div>
-                            <button
-                                className={`px-3 py-1 rounded transition ${item.status.includes("Assigned")
-                                    ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                    : "bg-teal-500 text-white hover:bg-teal-600"
-                                    }`}
-                                onClick={() => handleAssignClick(item)}
-                            >
-                                {item.status.includes("Assigned") ? "Reassign" : "Assign"}
-                            </button>
-                        </div>
-                    )}
+            {loading ? (
+                <div className="p-10 text-center text-gray-500">Loading requests...</div>
+            ) : data.length === 0 ? (
+                <div className="p-10 text-center text-gray-500 bg-white rounded-3xl shadow-md">
+                    No requests found.
                 </div>
-            ))}
-
-            {/* Assign Modal */}
-            {assignModal && selectedReq && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-                        <h2 className="text-lg font-bold mb-4">Assign Request {selectedReq.id}</h2>
-                        <select
-                            className="w-full border px-3 py-2 mb-4 rounded"
-                            value={selectedTech}
-                            onChange={(e) => setSelectedTech(e.target.value)}
-                        >
-                            <option value="">Select Tech</option>
-                            {techList.map((tech) => (
-                                <option key={tech} value={tech}>{tech}</option>
-                            ))}
-                        </select>
-                        <div className="flex justify-end gap-2">
-                            <button
-                                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
-                                onClick={() => setAssignModal(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="px-4 py-2 rounded bg-teal-500 text-white hover:bg-teal-600"
-                                onClick={handleTechAssign}
-                                disabled={!selectedTech}
-                            >
-                                Assign
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            ) : (
+                // Pass role properly so StatusTable knows whether to show "Assign" button
+                <StatusTable data={data} role={role === 'hod' ? 'Hod' : role === 'technician' ? 'Technician' : 'User'} showAssign={true} />
             )}
-        </div>
+        </>
     );
 }
 
-export default StatusTable;
+export default AssignToTech;
