@@ -8,6 +8,8 @@ import {
   Info,
 } from "lucide-react";
 
+import React, { useState, useEffect } from "react";
+import api from "../services/api";
 import Requestlist from "../components/Requestlist";
 
 export default function Dashboard() {
@@ -35,32 +37,54 @@ export default function Dashboard() {
   };
 
   // 📊 STATS
+  const [statsData, setStatsData] = useState({
+    total: 0,
+    pending: 0,
+    inProgress: 0,
+    closed: 0
+  });
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const res = await api.get("/request/stats", { params: { role, userId: user._id } });
+      if (!res.data.error) {
+        setStatsData(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
+
   const stats = [
     {
       id: "total",
       title: "Total Requests",
-      count: "1,248",
+      count: statsData.total,
       icon: ClipboardList,
       color: "bg-blue-500",
     },
     {
       id: "pending",
       title: "Pending",
-      count: "142",
+      count: statsData.pending,
       icon: Clock,
       color: "bg-yellow-500",
     },
     {
       id: "inProgress",
       title: "In Progress",
-      count: "56",
+      count: statsData.inProgress,
       icon: Wrench,
       color: "bg-indigo-500",
     },
     {
       id: "closed",
       title: "Closed",
-      count: "1,050",
+      count: statsData.closed,
       icon: CheckCircle,
       color: "bg-green-500",
     },

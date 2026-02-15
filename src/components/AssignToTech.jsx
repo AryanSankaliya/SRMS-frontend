@@ -31,7 +31,8 @@ function AssignToTech({ role }) {
                 const response = await api.get("/request/"); // Fetch all requests
 
                 if (!response.data.error) {
-                    let allTickets = response.data.data;
+                    // Sort by Newest First
+                    let allTickets = response.data.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
                     // Filter Logic based on Role
                     if (role === "technician") {
@@ -65,7 +66,7 @@ function AssignToTech({ role }) {
                         };
                     });
 
-                    setData(formattedData.reverse());
+                    setData(formattedData);
                 }
             } catch (error) {
                 console.error("Error loading requests:", error);

@@ -52,6 +52,7 @@ export default function Sidebar({ role }) {
             <>
               <SidebarLink icon={LayoutDashboard} text="Dashboard" to="/hod/dashboard" />
               <SidebarLink icon={ClipboardList} text="Assign to Tech" to="/hod/assign" />
+              <SidebarLink icon={Wrench} text="Technician Management" to="/hod/technician-management" />
               <SidebarLink icon={BarChart3} text="Master Pages" to="/hod/masterPages" />
             </>
           )}

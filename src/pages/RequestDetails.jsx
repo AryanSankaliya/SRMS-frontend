@@ -92,7 +92,22 @@ const RequestDetails = () => {
             </span>
           </p>
         </div>
-        <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-semibold">
+
+        <span
+          className={`px-4 py-1 rounded-full text-sm font-semibold
+            ${(ticket.serviceRequestStatusId?.serviceRequestStatusName || "Pending").toLowerCase().includes("pending")
+              ? "bg-yellow-100 text-yellow-700"
+              : (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("assigned")
+                ? "bg-blue-100 text-blue-700"
+                : (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("progress")
+                  ? "bg-indigo-100 text-indigo-700"
+                  : (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("resolved") || (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("closed")
+                    ? "bg-green-100 text-green-700"
+                    : (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("rejected") || (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("cancelled")
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-100 text-gray-700"
+            }`}
+        >
           {ticket.serviceRequestStatusId?.serviceRequestStatusName || "Pending"}
         </span>
       </div>
@@ -150,12 +165,31 @@ const RequestDetails = () => {
       </div>
 
       <div className="flex gap-4 border-t pt-6 justify-end">
+        {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="px-6 py-2 border rounded-lg hover:bg-gray-50 text-gray-600"
+          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-700 transition font-medium shadow-sm"
         >
           Back
         </button>
+
+        {/* Cancel Button (Only for User & Visible if NOT assigned/processed) */}
+        {role.toLowerCase() === "user" && (
+          <button
+            onClick={() => handleStatusChange("Cancelled")}
+            disabled={
+              updating ||
+              ticket.serviceRequestStatusId?.serviceRequestStatusName !== "Pending" ||
+              ticket.assignedToUserId // Disable if assigned
+            }
+            className={`px-6 py-2 border rounded-lg transition font-medium shadow-sm ${ticket.serviceRequestStatusId?.serviceRequestStatusName !== "Pending" || ticket.assignedToUserId
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+              : "bg-red-500 text-white hover:bg-red-600 border-red-500"
+              }`}
+          >
+            {updating ? "Cancelling..." : "Cancel Request"}
+          </button>
+        )}
 
         {role === "Technician" && (
           <>
@@ -190,7 +224,8 @@ const RequestDetails = () => {
             disabled={
               updating ||
               ticket.serviceRequestStatusId?.serviceRequestStatusName ===
-              "Closed"
+              "Closed" ||
+              ticket.serviceRequestStatusId?.serviceRequestStatusName !== "Resolved" // Only allow close if Resolved
             }
             className="px-6 py-2 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >

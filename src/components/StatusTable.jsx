@@ -15,7 +15,7 @@ function StatusTable({ data = [], role, showAssign = false }) {
 
   // --- 1. Fetch Technicians List ---
   useEffect(() => {
-    if (role === "Hod" || role === "Admin") {
+    if (role === "Hod") {
       const fetchTechs = async () => {
         try {
           // Changed to /staff as all technicians are now in Staff table
@@ -88,113 +88,119 @@ function StatusTable({ data = [], role, showAssign = false }) {
         <div>ACTION</div>
       </div>
 
-      {/* Rows */}
-      {data.map((item, index) => (
-        <div key={index} className="grid grid-cols-1 md:grid-cols-6 items-center py-4 border-b last:border-none hover:bg-gray-50 transition gap-3 md:gap-0">
+      {/* Rows Container with Scroll */}
+      <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+        {data.map((item, index) => (
+          <div key={index} className="grid grid-cols-1 md:grid-cols-6 items-center py-4 border-b last:border-none hover:bg-gray-50 transition gap-3 md:gap-0">
 
-          {/* Request No */}
-          <div className="flex justify-between md:block">
-            <span className="md:hidden font-semibold text-gray-500 text-sm">Request No:</span>
-            <div className="font-medium text-gray-800">{item.id}</div>
-          </div>
-
-          {/* Title */}
-          <div className="flex justify-between md:block">
-            <span className="md:hidden font-semibold text-gray-500 text-sm">Title:</span>
-            <div className="font-semibold text-gray-900 truncate pr-2" title={item.title}>{item.title}</div>
-          </div>
-
-          {/* Type */}
-          <div className="flex justify-between md:block">
-            <span className="md:hidden font-semibold text-gray-500 text-sm">Type:</span>
-            <div>
-              <span className={`px-3 py-1 text-xs rounded-full ${item.typeBg} ${item.typeText}`}>
-                {item.type}
-              </span>
+            {/* Request No */}
+            <div className="flex justify-between md:block">
+              <span className="md:hidden font-semibold text-gray-500 text-sm">Request No:</span>
+              <div className="font-medium text-gray-800">{item.id}</div>
             </div>
-          </div>
 
-          {/* Status */}
-          <div className="flex justify-between md:block">
-            <span className="md:hidden font-semibold text-gray-500 text-sm">Status:</span>
-            <div>
-              <span className={`px-3 py-1 text-xs rounded-full ${item.statusBg} ${item.statusText}`}>
-                {item.status}
-              </span>
+            {/* Title */}
+            <div className="flex justify-between md:block">
+              <span className="md:hidden font-semibold text-gray-500 text-sm">Title:</span>
+              <div className="font-semibold text-gray-900 truncate pr-2" title={item.title}>{item.title}</div>
             </div>
-          </div>
 
-          {/* Date */}
-          <div className="flex justify-between md:block">
-            <span className="md:hidden font-semibold text-gray-500 text-sm">Date:</span>
-            <div className="text-gray-600 text-sm">{item.date}</div>
-          </div>
+            {/* Type */}
+            <div className="flex justify-between md:block">
+              <span className="md:hidden font-semibold text-gray-500 text-sm">Type:</span>
+              <div>
+                <span className={`px-3 py-1 text-xs rounded-full ${item.typeBg} ${item.typeText}`}>
+                  {item.type}
+                </span>
+              </div>
+            </div>
 
-          {/* ACTION COLUMN */}
-          <div className="flex gap-2 mt-2 md:mt-0">
-            <button
-              onClick={() => navigate(`/request-details/${item.fullData?._id}`)}
-              className="text-gray-500 hover:text-teal-600 text-sm font-medium underline"
-            >
-              View
-            </button>
+            {/* Status */}
+            <div className="flex justify-between md:block">
+              <span className="md:hidden font-semibold text-gray-500 text-sm">Status:</span>
+              <div>
+                <span className={`px-3 py-1 text-xs rounded-full ${item.statusBg} ${item.statusText}`}>
+                  {item.status}
+                </span>
+              </div>
+            </div>
 
-            {/* Assign Button (Only for HOD/Admin AND if showAssign is true AND not already assigned) */}
-            {(role === "Hod" || role === "Admin") && showAssign &&
-              !item.status.toLowerCase().includes("assigned") &&
-              !item.status.toLowerCase().includes("progress") && (
+            {/* Date */}
+            <div className="flex justify-between md:block">
+              <span className="md:hidden font-semibold text-gray-500 text-sm">Date:</span>
+              <div className="text-gray-600 text-sm">{item.date}</div>
+            </div>
+
+            {/* ACTION COLUMN */}
+            <div className="flex gap-2 mt-2 md:mt-0">
+              <button
+                onClick={() => navigate(`/request-details/${item.fullData?._id}`)}
+                className="px-3 py-1 rounded text-sm font-medium transition shadow-sm whitespace-nowrap bg-indigo-500 text-white hover:bg-indigo-600 mr-2"
+              >
+                View
+              </button>
+
+              {/* Assign Button (Only for HOD/Admin AND if showAssign is true) */}
+              {(role === "Hod" || role === "Admin") && showAssign && (
                 <button
-                  className="px-3 py-1 rounded text-sm transition shadow-sm whitespace-nowrap bg-teal-500 text-white hover:bg-teal-600"
+                  className={`px-3 py-1 rounded text-sm transition shadow-sm whitespace-nowrap ${item.status.toLowerCase().includes("assigned") || item.status.toLowerCase().includes("progress") || item.status.toLowerCase().includes("resolved") || item.status.toLowerCase().includes("closed") || item.status.toLowerCase().includes("cancelled")
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-teal-500 text-white hover:bg-teal-600"
+                    }`}
                   onClick={() => handleAssignClick(item)}
+                  disabled={item.status.toLowerCase().includes("assigned") || item.status.toLowerCase().includes("progress") || item.status.toLowerCase().includes("resolved") || item.status.toLowerCase().includes("closed") || item.status.toLowerCase().includes("cancelled")}
                 >
-                  Assign
+                  {item.status.toLowerCase().includes("assigned") || item.status.toLowerCase().includes("progress") ? "Assigned" : "Assign"}
                 </button>
               )}
-          </div>
-        </div>
-      ))}
-
-      {/* --- Assign Modal --- */}
-      {assignModal && selectedReq && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-xl shadow-2xl w-96 transform transition-all scale-100">
-            <h2 className="text-xl font-bold mb-1 text-gray-800">Assign Technician</h2>
-            <p className="text-sm text-gray-500 mb-4">Request ID: {selectedReq.id}</p>
-
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Technician</label>
-            <select
-              className="w-full border border-gray-300 px-3 py-2 mb-6 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
-              value={selectedTech}
-              onChange={(e) => setSelectedTech(e.target.value)}
-            >
-              <option value="">-- Choose a Technician --</option>
-              {techList.map((tech) => (
-                <option key={tech._id} value={tech._id}>
-                  {tech.name} ({tech.email})
-                </option>
-              ))}
-            </select>
-
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition"
-                onClick={() => setAssignModal(false)}
-                disabled={loadingAssign}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-6 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-md transition disabled:opacity-50"
-                onClick={handleTechAssign}
-                disabled={!selectedTech || loadingAssign}
-              >
-                {loadingAssign ? "Assigning..." : "Confirm Assignment"}
-              </button>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        ))}
+      </div>
+
+      {/* --- Assign Modal --- */}
+      {
+        assignModal && selectedReq && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-xl shadow-2xl w-96 transform transition-all scale-100">
+              <h2 className="text-xl font-bold mb-1 text-gray-800">Assign Technician</h2>
+              <p className="text-sm text-gray-500 mb-4">Request ID: {selectedReq.id}</p>
+
+              <label className="block text-sm font-medium text-gray-700 mb-1">Select Technician</label>
+              <select
+                className="w-full border border-gray-300 px-3 py-2 mb-6 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+                value={selectedTech}
+                onChange={(e) => setSelectedTech(e.target.value)}
+              >
+                <option value="">-- Choose a Technician --</option>
+                {techList.map((tech) => (
+                  <option key={tech._id} value={tech._id}>
+                    {tech.name} ({tech.email})
+                  </option>
+                ))}
+              </select>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition"
+                  onClick={() => setAssignModal(false)}
+                  disabled={loadingAssign}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-6 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 shadow-md transition disabled:opacity-50"
+                  onClick={handleTechAssign}
+                  disabled={!selectedTech || loadingAssign}
+                >
+                  {loadingAssign ? "Assigning..." : "Confirm Assignment"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    </div >
   );
 }
 

@@ -23,6 +23,7 @@ import StatusMaster from "./pages/admin/StatusMaster";
 import ServiceDepartmentPersonMaster from "./pages/admin/ServiceDepartmentPersonMaster";
 import ServiceRequestTypeMaster from "./pages/admin/ServiceRequestTypeMaster";
 import ServiceRequestTypeWisePerson from "./pages/admin/ServiceRequestTypeWisePerson";
+import TechnicianManagement from "./pages/admin/TechnicianManagement";
 
 /* Components */
 import AddRequestForm from "./components/AddRequestForm";
@@ -63,6 +64,7 @@ function App() {
           <Route path="hod/dashboard" element={<Dashboard />} />
           <Route path="hod/assign" element={<AssignToTech role="hod" />} />
           <Route path="hod/requestlist" element={<Requestlist />} />
+          <Route path="hod/technician-management" element={<TechnicianManagement />} />
 
           {/* Technician */}
           <Route path="technician/dashboard" element={<Dashboard />} />
