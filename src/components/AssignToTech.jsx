@@ -11,7 +11,7 @@ function AssignToTech({ role }) {
         const s = status?.toLowerCase() || "";
         if (s.includes("assigned")) return { bg: "bg-blue-100", text: "text-blue-600" };
         if (s.includes("pending")) return { bg: "bg-yellow-100", text: "text-yellow-600" };
-        if (s.includes("resolved") || s.includes("closed")) return { bg: "bg-green-100", text: "text-green-600" };
+        if (s.includes("resolved") || s.includes("closed") || s.includes("completed")) return { bg: "bg-green-100", text: "text-green-600" };
         if (s.includes("rejected")) return { bg: "bg-red-100", text: "text-red-600" };
         return { bg: "bg-gray-100", text: "text-gray-600" };
     };

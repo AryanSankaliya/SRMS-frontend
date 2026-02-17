@@ -11,6 +11,7 @@ import {
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import Requestlist from "../components/Requestlist";
+import DashboardStats from "../components/DashboardStats";
 
 export default function Dashboard() {
   // ✅ GET ROLE FROM LOGIN
@@ -25,7 +26,7 @@ export default function Dashboard() {
       showNotifications: true,
     },
     Technician: {
-      stats: ["pending", "inProgress", "closed"],
+      stats: ["total", "assigned", "completed"],
       showRequests: true,
       showNotifications: true,
     },
@@ -50,7 +51,15 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const res = await api.get("/request/stats", { params: { role, userId: user._id } });
+      const userId = user?._id || user?.id;
+      console.log("Fetching stats for:", { role, userId });
+
+      if (!userId) {
+        console.error("User ID is missing!");
+        return;
+      }
+
+      const res = await api.get("/request/stats", { params: { role, userId } });
       if (!res.data.error) {
         setStatsData(res.data.data);
       }
@@ -58,6 +67,10 @@ export default function Dashboard() {
       console.error("Error fetching stats:", error);
     }
   };
+
+  // 🧮 Derived Stats for Tech
+  const techCompleted = (statsData.resolved || 0) + (statsData.closed || 0);
+  const techPendingWork = (statsData.assigned || 0) + (statsData.inProgress || 0);
 
   const stats = [
     {
@@ -68,25 +81,39 @@ export default function Dashboard() {
       color: "bg-blue-500",
     },
     {
-      id: "pending",
+      id: "pending", // For HOD/User
       title: "Pending",
       count: statsData.pending,
       icon: Clock,
       color: "bg-yellow-500",
     },
     {
-      id: "inProgress",
+      id: "assigned", // For Tech (Pending Work)
+      title: "Pending Work",
+      count: techPendingWork,
+      icon: AlertTriangle,
+      color: "bg-orange-500",
+    },
+    {
+      id: "inProgress", // For HOD detailed view
       title: "In Progress",
       count: statsData.inProgress,
       icon: Wrench,
       color: "bg-indigo-500",
     },
     {
-      id: "closed",
+      id: "completed", // For Tech (Resolved + Closed)
+      title: "Completed",
+      count: techCompleted,
+      icon: CheckCircle,
+      color: "bg-green-500",
+    },
+    {
+      id: "closed", // For HOD (Strictly Closed)
       title: "Closed",
       count: statsData.closed,
       icon: CheckCircle,
-      color: "bg-green-500",
+      color: "bg-emerald-600",
     },
   ];
 
@@ -150,6 +177,9 @@ export default function Dashboard() {
             );
           })}
       </div>
+
+      {/* 📊 CHARTS */}
+      <DashboardStats stats={statsData} role={role} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 📋 REQUEST LIST */}

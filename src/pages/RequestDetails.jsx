@@ -38,8 +38,6 @@ const RequestDetails = () => {
   }, [id]);
 
   const handleStatusChange = async (newStatusName) => {
-    console.log("Mere paas ye Statuses aaye DB se:", statusList);
-    console.log("Main dhoond raha hu:", newStatusName);
     const targetStatus = statusList.find(
       (s) =>
         s.serviceRequestStatusName?.toLowerCase() ===
@@ -101,7 +99,7 @@ const RequestDetails = () => {
                 ? "bg-blue-100 text-blue-700"
                 : (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("progress")
                   ? "bg-indigo-100 text-indigo-700"
-                  : (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("resolved") || (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("closed")
+                  : (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("completed") || (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("resolved") || (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("closed")
                     ? "bg-green-100 text-green-700"
                     : (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("rejected") || (ticket.serviceRequestStatusId?.serviceRequestStatusName || "").toLowerCase().includes("cancelled")
                       ? "bg-red-100 text-red-700"
@@ -197,23 +195,27 @@ const RequestDetails = () => {
               onClick={() => handleStatusChange("In Progress")}
               disabled={
                 updating ||
-                ticket.serviceRequestStatusId?.serviceRequestStatusName ===
-                "In Progress"
+                ["In Progress", "Completed", "Resolved", "Closed"].includes(ticket.serviceRequestStatusId?.serviceRequestStatusName)
               }
-              className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+              className={`px-6 py-2 rounded-lg text-white transition ${["In Progress", "Completed", "Resolved", "Closed"].includes(ticket.serviceRequestStatusId?.serviceRequestStatusName)
+                  ? "bg-yellow-300 cursor-not-allowed"
+                  : "bg-yellow-500 hover:bg-yellow-600"
+                }`}
             >
               {updating ? "Wait..." : "Start Work"}
             </button>
             <button
-              onClick={() => handleStatusChange("Resolved")}
+              onClick={() => handleStatusChange("Completed")}
               disabled={
                 updating ||
-                ticket.serviceRequestStatusId?.serviceRequestStatusName ===
-                "Resolved"
+                ["Completed", "Resolved", "Closed"].includes(ticket.serviceRequestStatusId?.serviceRequestStatusName)
               }
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              className={`px-6 py-2 rounded-lg text-white transition ${["Completed", "Resolved", "Closed"].includes(ticket.serviceRequestStatusId?.serviceRequestStatusName)
+                  ? "bg-green-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+                }`}
             >
-              {updating ? "Wait..." : "Mark as Resolved"}
+              {updating ? "Wait..." : "Mark as Completed"}
             </button>
           </>
         )}
@@ -225,7 +227,7 @@ const RequestDetails = () => {
               updating ||
               ticket.serviceRequestStatusId?.serviceRequestStatusName ===
               "Closed" ||
-              ticket.serviceRequestStatusId?.serviceRequestStatusName !== "Resolved" // Only allow close if Resolved
+              ticket.serviceRequestStatusId?.serviceRequestStatusName !== "Completed" // Only allow close if Completed
             }
             className="px-6 py-2 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
