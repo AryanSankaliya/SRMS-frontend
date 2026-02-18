@@ -43,7 +43,7 @@ export default function MainLayout() {
 
 
   const user = JSON.parse(localStorage.getItem("user"));
-  const userName = user?.userName || "User";
+  const userName = user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "User";
   const role = user?.role || "User";
 
   return (

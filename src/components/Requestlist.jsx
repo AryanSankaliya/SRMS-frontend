@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import StatusDropdown from "./StatusDropdown";
 import StatusTable from "./StatusTable";
 import api from "../../src/services/api";
 
 function Requestlist({ role }) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialSearch = queryParams.get("search") || "";
+
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState("All");
 
   const [data, setData] = useState([]);
