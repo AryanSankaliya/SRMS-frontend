@@ -13,7 +13,7 @@ function TechnicianManagement() {
     const [techModal, setTechModal] = useState(false);
     const [mappingModal, setMappingModal] = useState(false);
 
-    const [techForm, setTechForm] = useState({ name: "", email: "", password: "", mobile: "", designation: "Technician" });
+    const [techForm, setTechForm] = useState({ firstName: "", lastName: "", email: "", password: "", mobile: "", designation: "Technician" });
     const [mappingForm, setMappingForm] = useState({ serviceRequestTypeId: "", staffId: "", fromDate: "", toDate: "", description: "" });
 
     const [reqTypes, setReqTypes] = useState([]);
@@ -37,9 +37,8 @@ function TechnicianManagement() {
             if (activeTab === "technicians") {
                 const res = await api.get("/staff/");
                 if (!res.data.error) {
-                    // Filter only technicians if needed, or show all staff with designation 'Technician'
-                    // For now showing all active staff
-                    setTechnicians(res.data.data.filter(s => s.isActive && s.designation !== "HOD"));
+                    // Filter inactive staff if needed, but show all active staff including HODs
+                    setTechnicians(res.data.data.filter(s => s.isActive));
                 }
             } else {
                 const res = await api.get("/typeWisePerson/");
@@ -61,7 +60,7 @@ function TechnicianManagement() {
                 toast.success("Technician Created!");
                 setTechModal(false);
                 fetchData();
-                setTechForm({ name: "", email: "", password: "", mobile: "", designation: "Technician" });
+                setTechForm({ firstName: "", lastName: "", email: "", password: "", mobile: "", designation: "Technician" });
             } else {
                 toast.error(res.data.message);
             }
@@ -101,7 +100,7 @@ function TechnicianManagement() {
                     className={`pb-2 px-4 font-medium transition ${activeTab === "technicians" ? "border-b-2 border-teal-600 text-teal-600" : "text-gray-500 hover:text-gray-700"}`}
                     onClick={() => setActiveTab("technicians")}
                 >
-                    Manage Technicians
+                    Manage Staff
                 </button>
                 <button
                     className={`pb-2 px-4 font-medium transition ${activeTab === "mappings" ? "border-b-2 border-teal-600 text-teal-600" : "text-gray-500 hover:text-gray-700"}`}
@@ -118,12 +117,12 @@ function TechnicianManagement() {
                 ) : activeTab === "technicians" ? (
                     <>
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold">Technician List</h2>
+                            <h2 className="text-lg font-semibold">Staff List</h2>
                             <button
                                 onClick={() => setTechModal(true)}
                                 className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition shadow"
                             >
-                                <FaUserPlus /> Hire New Technician
+                                <FaUserPlus /> Add New Staff
                             </button>
                         </div>
 
@@ -140,7 +139,7 @@ function TechnicianManagement() {
                                 <tbody>
                                     {technicians.length > 0 ? technicians.map((tech) => (
                                         <tr key={tech._id} className="border-b hover:bg-gray-50">
-                                            <td className="px-4 py-3 font-medium text-gray-900">{tech.name}</td>
+                                            <td className="px-4 py-3 font-medium text-gray-900">{tech.firstName} {tech.lastName}</td>
                                             <td className="px-4 py-3">{tech.email}</td>
                                             <td className="px-4 py-3">{tech.mobile}</td>
                                             <td className="px-4 py-3">
@@ -188,7 +187,7 @@ function TechnicianManagement() {
                                                 {map.serviceRequestTypeId?.serviceRequestTypeName}
                                             </td>
                                             <td className="px-4 py-3 font-medium text-indigo-600">
-                                                {map.staffId?.name}
+                                                {map.staffId?.firstName} {map.staffId?.lastName}
                                             </td>
                                             <td className="px-4 py-3">
                                                 {new Date(map.fromDate).toLocaleDateString('en-GB')}
@@ -213,13 +212,21 @@ function TechnicianManagement() {
             {techModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
                     <div className="bg-white p-6 rounded-xl shadow-2xl w-96">
-                        <h3 className="text-xl font-bold mb-4">Hire New Technician</h3>
-                        <input
-                            className="w-full border p-2 rounded mb-3 outline-none focus:ring-2 focus:ring-teal-500"
-                            placeholder="Full Name"
-                            value={techForm.name}
-                            onChange={e => setTechForm({ ...techForm, name: e.target.value })}
-                        />
+                        <h3 className="text-xl font-bold mb-4">Add New Staff</h3>
+                        <div className="flex gap-2 mb-3">
+                            <input
+                                className="w-1/2 border p-2 rounded outline-none focus:ring-2 focus:ring-teal-500"
+                                placeholder="First Name"
+                                value={techForm.firstName}
+                                onChange={e => setTechForm({ ...techForm, firstName: e.target.value })}
+                            />
+                            <input
+                                className="w-1/2 border p-2 rounded outline-none focus:ring-2 focus:ring-teal-500"
+                                placeholder="Last Name"
+                                value={techForm.lastName}
+                                onChange={e => setTechForm({ ...techForm, lastName: e.target.value })}
+                            />
+                        </div>
                         <input
                             className="w-full border p-2 rounded mb-3 outline-none focus:ring-2 focus:ring-teal-500"
                             placeholder="Email (Login ID)"
@@ -239,6 +246,14 @@ function TechnicianManagement() {
                             value={techForm.mobile}
                             onChange={e => setTechForm({ ...techForm, mobile: e.target.value })}
                         />
+                        <select
+                            className="w-full border p-2 rounded mb-3 outline-none focus:ring-2 focus:ring-teal-500"
+                            value={techForm.designation}
+                            onChange={e => setTechForm({ ...techForm, designation: e.target.value })}
+                        >
+                            <option value="Technician">Technician</option>
+                            <option value="HOD">HOD</option>
+                        </select>
                         <div className="flex justify-end gap-2 mt-4">
                             <button onClick={() => setTechModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
                             <button onClick={handleCreateTech} className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">Create Account</button>
@@ -273,7 +288,7 @@ function TechnicianManagement() {
                         >
                             <option value="">-- Select Technician --</option>
                             {technicians.map(tech => (
-                                <option key={tech._id} value={tech._id}>{tech.name}</option>
+                                <option key={tech._id} value={tech._id}>{tech.firstName} {tech.lastName}</option>
                             ))}
                         </select>
 

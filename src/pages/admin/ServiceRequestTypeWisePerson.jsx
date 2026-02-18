@@ -169,7 +169,7 @@ function ServiceRequestTypeWisePerson() {
                                         <tr key={item._id} className="border-b last:border-none hover:bg-gray-50 text-sm">
                                             <td className="py-3 px-4 font-medium text-gray-800">{item.serviceRequestTypeId?.serviceRequestTypeName || "N/A"}</td>
                                             <td className="py-3 px-4 text-gray-600">
-                                                {item.staffId?.name || "-"}
+                                                {item.staffId ? `${item.staffId.firstName} ${item.staffId.lastName}` : "-"}
                                             </td>
                                             <td className="py-3 px-4 text-gray-600">
                                                 {item.fromDate ? new Date(item.fromDate).toLocaleDateString() : "-"}
@@ -240,7 +240,7 @@ function ServiceRequestTypeWisePerson() {
                                     <option value="">Select Staff</option>
                                     {staffList.map(staff => (
                                         <option key={staff._id} value={staff._id}>
-                                            {staff.name} ({staff.email})
+                                            {staff.firstName} {staff.lastName} ({staff.email})
                                         </option>
                                     ))}
                                 </select>

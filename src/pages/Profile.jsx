@@ -83,7 +83,7 @@ function Profile() {
             <div className="p-6 flex flex-col items-center text-center">
               <div className="relative">
                 <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-blue-100 to-blue-50 flex items-center justify-center text-4xl font-bold text-blue-600 mb-4">
-                  {user.firstName ? user.firstName.charAt(0).toUpperCase() : <User />}
+                  {(user.firstName || user.name) ? (user.firstName || user.name).charAt(0).toUpperCase() : <User />}
                 </div>
                 {/* <button className="absolute bottom-4 right-0 p-2 bg-white rounded-full shadow-sm border border-gray-200 text-gray-500 hover:text-blue-600 transition-colors">
                   <Camera className="w-4 h-4" />
@@ -91,7 +91,7 @@ function Profile() {
               </div>
 
               <h2 className="text-2xl font-bold text-gray-800">
-                {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : "User Name"}
+                {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name || "User Name"}
               </h2>
               <p className="text-gray-500 text-sm mb-4">{user.email}</p>
 
@@ -203,7 +203,7 @@ function Profile() {
               </div>
             </div>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="flex justify-end gap-4">
             <button className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">

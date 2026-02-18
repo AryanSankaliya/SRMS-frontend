@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Outlet, useLocation, Navigate } from "react-router-dom";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
@@ -42,9 +43,25 @@ export default function MainLayout() {
 
 
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userName = user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "User";
+  /* 
+   * FIX: Usage of useState and useEffect ensures that 'user' data 
+   * is retrieved ONLY after the component mounts. This prevents 
+   * hydration mismatches and ensures localStorage is available.
+   */
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const userName = user?.firstName && user?.lastName
+    ? `${user.firstName} ${user.lastName}`
+    : user?.name || "User";
   const role = user?.role || "User";
+  const email = user?.email || "user@example.com";
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -57,6 +74,7 @@ export default function MainLayout() {
           breadcrumb={currentHeader.breadcrumb}
           userName={userName}
           role={role}
+          email={email}
         />
 
         <main className="flex-1 p-6">

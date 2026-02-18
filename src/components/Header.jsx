@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   FaUserCircle,
   FaChevronDown,
@@ -15,9 +15,99 @@ export default function Header({
   breadcrumb = ["Dashboard"],
   userName = "User Name",
   role = "User",
+  email = "user@example.com",
 }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const notifRef = useRef(null);
+  const profileRef = useRef(null);
+
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      const data = await notificationService.getUserNotifications();
+      // data.data is the array, data.unreadCount is the count
+      if (data && data.success) {
+        setNotifications(data.data);
+        setUnreadCount(data.unreadCount);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    // Poll for notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        open === "notifications" &&
+        notifRef.current &&
+        !notifRef.current.contains(event.target)
+      ) {
+        setOpen(false);
+      }
+      if (
+        open === "profile" &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
+  const markAsRead = async (id) => {
+    try {
+      await notificationService.markAsRead(id);
+      // Optimistic update
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+      toast.success("All notifications marked as read");
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  };
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return "Just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800)
+      return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    return date.toLocaleDateString();
+  };
 
   const roleColor =
     role === "Admin"
@@ -47,8 +137,8 @@ export default function Header({
             <span key={index} className="flex items-center">
               <span
                 className={`${index === breadcrumb.length - 1
-                  ? "text-blue-600"
-                  : "hover:text-blue-500 transition-colors"
+                    ? "text-blue-600"
+                    : "hover:text-blue-500 transition-colors"
                   }`}
               >
                 {item}
@@ -67,14 +157,14 @@ export default function Header({
           <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search for requests, technicians..."
+            placeholder="Search for requests"
             className="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-full py-2.5 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all shadow-sm group-hover:bg-white"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 const query = e.target.value;
                 if (query.trim()) {
                   let path = "/user/requestlist";
-                  if (role === "Hod" || role === "Admin") path = "/hod/requestlist";
+                  if (role === "Hod") path = "/hod/requestlist";
                   navigate(`${path}?search=${encodeURIComponent(query)}`);
                 }
               }
@@ -86,37 +176,71 @@ export default function Header({
       {/* Right Section: Controls & Profile */}
       <div className="flex items-center gap-5">
         {/* Notification Bell */}
-        <div className="relative">
+        <div className="relative" ref={notifRef}>
           <button
-            onClick={() => setOpen(open === "notifications" ? false : "notifications")}
+            onClick={() =>
+              setOpen(open === "notifications" ? false : "notifications")
+            }
             className="relative p-2.5 rounded-full text-gray-500 hover:bg-gray-100 hover:text-blue-600 transition-all"
           >
             <FaBell className="text-lg" />
-            <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+            {unreadCount > 0 && (
+              <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+            )}
           </button>
 
           {open === "notifications" && (
             <div className="absolute right-0 mt-3 w-80 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 transform origin-top-right transition-all animate-in fade-in zoom-in-95 duration-200">
               <div className="px-4 py-3 border-b border-gray-100 mb-1 bg-gray-50/50 flex justify-between items-center">
-                <p className="text-sm font-semibold text-gray-800">Notifications</p>
-                <span className="text-xs text-blue-600 font-medium cursor-pointer hover:underline">Mark all read</span>
+                <p className="text-sm font-semibold text-gray-800">
+                  Notifications
+                </p>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-xs text-blue-600 font-medium cursor-pointer hover:underline flex items-center gap-1"
+                  >
+                    <FaCheckDouble /> Mark all read
+                  </button>
+                )}
               </div>
-              <div className="max-h-64 overflow-y-auto">
-                {/* Dummy Notifications */}
-                {[
-                  { id: 1, message: "New request assigned", time: "10m ago", read: false },
-                  { id: 2, message: "System maintenance scheduled", time: "1h ago", read: true },
-                  { id: 3, message: "Request #1024 updated", time: "2h ago", read: true },
-                ].map((notif) => (
-                  <div key={notif.id} className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 ${!notif.read ? "bg-blue-50/30" : ""}`}>
-                    <p className="text-sm text-gray-800">{notif.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">{notif.time}</p>
+              <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                {notifications.length > 0 ? (
+                  notifications.map((notif) => (
+                    <div
+                      key={notif._id}
+                      onClick={() => !notif.isRead && markAsRead(notif._id)}
+                      className={`px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors ${!notif.isRead ? "bg-blue-50/40" : ""
+                        }`}
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <p
+                          className={`text-sm ${!notif.isRead ? "font-medium text-gray-900" : "text-gray-600"}`}
+                        >
+                          {notif.message}
+                        </p>
+                        {!notif.isRead && (
+                          <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1.5"></span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-400 mt-1.5 font-medium">
+                        {formatTime(notif.createdAt)}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-8 text-center text-gray-400">
+                    <p className="text-sm">No notifications yet</p>
                   </div>
-                ))}
-                <div className="px-4 py-3 text-center text-xs text-gray-500">
-                  No more notifications
-                </div>
+                )}
               </div>
+              {notifications.length > 0 && (
+                <div className="px-4 py-2 text-center border-t border-gray-50 bg-gray-50/30">
+                  <span className="text-[10px] text-gray-400 font-medium">
+                    Last 20 notifications
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -124,7 +248,7 @@ export default function Header({
         <div className="h-8 w-px bg-gray-200 mx-1"></div>
 
         {/* User Profile Dropdown */}
-        <div className="relative">
+        <div className="relative" ref={profileRef}>
           <button
             onClick={() => setOpen(open === "profile" ? false : "profile")}
             className="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all group"
@@ -158,7 +282,7 @@ export default function Header({
               <div className="px-4 py-3 border-b border-gray-100 mb-1 bg-gray-50/50">
                 <p className="text-sm font-medium text-gray-800">{userName}</p>
                 <p className="text-xs text-gray-500 truncate">
-                  user@example.com
+                  {email}
                 </p>
               </div>
 
@@ -179,6 +303,11 @@ export default function Header({
                 >
                   <FaBell className="text-yellow-500" />
                   Notifications
+                  {unreadCount > 0 && (
+                    <span className="ml-auto bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-[10px] font-bold">
+                      {unreadCount}
+                    </span>
+                  )}
                 </button>
               </div>
 
