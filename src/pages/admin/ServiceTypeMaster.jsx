@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { toast } from "react-hot-toast";
 import { Edit2, Trash2, Plus } from "lucide-react";
+import { useConfirm } from "../../components/ui/ConfirmProvider";
+import { getErrorMessage } from "../../utils/errorHandler";
+import InlineLoader from "../../components/ui/InlineLoader";
 
 function ServiceTypeMaster() {
+    const confirm = useConfirm();
     const [serviceTypes, setServiceTypes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,8 +20,6 @@ function ServiceTypeMaster() {
         serviceTypeName: "",
         description: "",
         sequence: 0,
-        isForStaff: false,
-        isForUser: false,
         createdByUserId: user?._id || user?.userId
     });
 
@@ -34,7 +36,7 @@ function ServiceTypeMaster() {
             }
         } catch (error) {
             console.error(error);
-            toast.error("Failed to fetch service types");
+            toast.error(getErrorMessage(error, "Failed to fetch service types"));
         } finally {
             setLoading(false);
         }
@@ -59,7 +61,7 @@ function ServiceTypeMaster() {
                 if (!res.data.error) {
                     toast.success("Service Type Updated!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             } else {
                 // Create
@@ -67,14 +69,14 @@ function ServiceTypeMaster() {
                 if (!res.data.error) {
                     toast.success("Service Type Added!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             }
             closeModal();
             fetchServiceTypes();
         } catch (error) {
             console.error(error);
-            toast.error("Operation Failed");
+            toast.error(getErrorMessage(error, "Operation Failed"));
         }
     };
 
@@ -84,26 +86,25 @@ function ServiceTypeMaster() {
             serviceTypeName: item.serviceTypeName,
             description: item.description,
             sequence: item.sequence,
-            isForStaff: item.isForStaff,
-            isForUser: item.isForUser,
             createdByUserId: item.createdByUserId
         });
         setIsModalOpen(true);
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this service type?")) return;
+        const isConfirmed = await confirm("Delete Service Type", "Are you sure you want to delete this service type? This action cannot be undone.");
+        if (!isConfirmed) return;
         try {
             const res = await api.delete(`/type/${id}`);
             if (!res.data.error) {
                 toast.success("Service Type Deleted");
                 fetchServiceTypes();
             } else {
-                toast.error(res.data.message);
+                toast.error(getErrorMessage(res.data.message));
             }
         } catch (error) {
             console.error(error);
-            toast.error("Delete Failed");
+            toast.error(getErrorMessage(error, "Delete Failed"));
         }
     };
 
@@ -114,8 +115,6 @@ function ServiceTypeMaster() {
             serviceTypeName: "",
             description: "",
             sequence: 0,
-            isForStaff: false,
-            isForUser: false,
             createdByUserId: user?._id
         });
     };
@@ -136,7 +135,7 @@ function ServiceTypeMaster() {
             </div>
 
             {loading ? (
-                <div className="text-center py-10 text-gray-500">Loading...</div>
+                <InlineLoader label="Loading services..." />
             ) : (
                 <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
@@ -146,8 +145,6 @@ function ServiceTypeMaster() {
                                     <th className="py-3 px-4 whitespace-nowrap">Name</th>
                                     <th className="py-3 px-4 whitespace-nowrap">Description</th>
                                     <th className="py-3 px-4 whitespace-nowrap">Seq</th>
-                                    <th className="py-3 px-4 whitespace-nowrap">For Staff</th>
-                                    <th className="py-3 px-4 whitespace-nowrap">For User</th>
                                     <th className="py-3 px-4 whitespace-nowrap text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -166,16 +163,6 @@ function ServiceTypeMaster() {
                                                 {item.description}
                                             </td>
                                             <td className="py-3 px-4 text-gray-600">{item.sequence}</td>
-                                            <td className="py-3 px-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${item.isForStaff ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                    {item.isForStaff ? "Yes" : "No"}
-                                                </span>
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${item.isForUser ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                    {item.isForUser ? "Yes" : "No"}
-                                                </span>
-                                            </td>
                                             <td className="py-3 px-4 flex justify-end gap-2">
                                                 <button
                                                     onClick={() => handleEdit(item)}
@@ -240,31 +227,6 @@ function ServiceTypeMaster() {
                                     onChange={handleChange}
                                     className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
                                 />
-                            </div>
-
-                            <div className="flex gap-4">
-                                <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border flex-1">
-                                    <input
-                                        type="checkbox"
-                                        name="isForStaff"
-                                        checked={formData.isForStaff}
-                                        onChange={handleChange}
-                                        id="isForStaff"
-                                        className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500 cursor-pointer"
-                                    />
-                                    <label htmlFor="isForStaff" className="text-sm text-gray-700 cursor-pointer select-none">For Staff?</label>
-                                </div>
-                                <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border flex-1">
-                                    <input
-                                        type="checkbox"
-                                        name="isForUser"
-                                        checked={formData.isForUser}
-                                        onChange={handleChange}
-                                        id="isForUser"
-                                        className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500 cursor-pointer"
-                                    />
-                                    <label htmlFor="isForUser" className="text-sm text-gray-700 cursor-pointer select-none">For User?</label>
-                                </div>
                             </div>
 
                             <div className="flex justify-end gap-3 mt-6">

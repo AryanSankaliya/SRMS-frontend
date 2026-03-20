@@ -2,8 +2,13 @@ import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { toast } from "react-hot-toast";
 import { Edit2, Trash2, Plus } from "lucide-react";
+import { useConfirm } from "../../components/ui/ConfirmProvider";
+import { getErrorMessage } from "../../utils/errorHandler";
+import InlineLoader from "../../components/ui/InlineLoader";
+import CustomSelect from "../../components/ui/CustomSelect";
 
 function ServiceRequestTypeWisePerson() {
+    const confirm = useConfirm();
     const [mappings, setMappings] = useState([]);
     const [requestTypes, setRequestTypes] = useState([]);
     const [staffList, setStaffList] = useState([]);
@@ -42,7 +47,7 @@ function ServiceRequestTypeWisePerson() {
 
         } catch (error) {
             console.error(error);
-            toast.error("Failed to load data");
+            toast.error(getErrorMessage(error, "Failed to load data"));
         } finally {
             setLoading(false);
         }
@@ -66,21 +71,21 @@ function ServiceRequestTypeWisePerson() {
                 if (!res.data.error) {
                     toast.success("Mapping Updated!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             } else {
                 const res = await api.post("/typeWisePerson/", payload);
                 if (!res.data.error) {
                     toast.success("Mapping Added!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             }
             closeModal();
             fetchInitialData();
         } catch (error) {
             console.error(error);
-            toast.error("Operation Failed");
+            toast.error(getErrorMessage(error, "Operation Failed"));
         }
     };
 
@@ -98,18 +103,19 @@ function ServiceRequestTypeWisePerson() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this mapping?")) return;
+        const isConfirmed = await confirm("Delete Mapping", "Are you sure you want to delete this mapping?");
+        if (!isConfirmed) return;
         try {
             const res = await api.delete(`/typeWisePerson/${id}`);
             if (!res.data.error) {
                 toast.success("Deleted");
                 fetchInitialData();
             } else {
-                toast.error(res.data.message);
+                toast.error(getErrorMessage(res.data.message));
             }
         } catch (error) {
             console.error(error);
-            toast.error("Delete Failed");
+            toast.error(getErrorMessage(error, "Delete Failed"));
         }
     };
 
@@ -142,11 +148,11 @@ function ServiceRequestTypeWisePerson() {
             </div>
 
             {loading ? (
-                <div className="text-center py-10 text-gray-500">Loading...</div>
+                <InlineLoader label="Loading mappings..." />
             ) : (
                 <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[900px]">
+                    <div className="w-full">
+                        <table className="w-full text-left border-collapse">
                             <thead className="bg-gray-50">
                                 <tr className="text-sm font-semibold text-gray-600 border-b">
                                     <th className="py-3 px-4 whitespace-nowrap">Request Type</th>
@@ -214,36 +220,34 @@ function ServiceRequestTypeWisePerson() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Request Type</label>
-                                <select
+                                <CustomSelect
                                     name="serviceRequestTypeId"
                                     value={formData.serviceRequestTypeId}
                                     onChange={handleChange}
                                     required
-                                    className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
                                 >
-                                    <option value="">Select Request Type</option>
+                                    <option value="" disabled>Select Request Type</option>
                                     {requestTypes.map(type => (
                                         <option key={type._id} value={type._id}>{type.serviceRequestTypeName}</option>
                                     ))}
-                                </select>
+                                </CustomSelect>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Staff Member</label>
-                                <select
+                                <CustomSelect
                                     name="staffId"
                                     value={formData.staffId}
                                     onChange={handleChange}
                                     required
-                                    className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
                                 >
-                                    <option value="">Select Staff</option>
+                                    <option value="" disabled>Select Staff</option>
                                     {staffList.map(staff => (
                                         <option key={staff._id} value={staff._id}>
                                             {staff.firstName} {staff.lastName} ({staff.email})
                                         </option>
                                     ))}
-                                </select>
+                                </CustomSelect>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

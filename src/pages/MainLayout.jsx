@@ -3,6 +3,7 @@ import { Outlet, useLocation, Navigate } from "react-router-dom";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
+import PageLoader from "../components/ui/PageLoader";
 
 export default function MainLayout() {
   const location = useLocation();
@@ -49,13 +50,21 @@ export default function MainLayout() {
    * hydration mismatches and ensures localStorage is available.
    */
   const [user, setUser] = useState(null);
+  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    // Small delay to allow smooth loader animation
+    const t = setTimeout(() => setAppReady(true), 700);
+    return () => clearTimeout(t);
   }, []);
+
+  if (!appReady) {
+    return <PageLoader label="Loading" />;
+  }
 
   const userName = user?.firstName && user?.lastName
     ? `${user.firstName} ${user.lastName}`

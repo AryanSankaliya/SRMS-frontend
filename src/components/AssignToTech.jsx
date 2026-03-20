@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import StatusTable from "./StatusTable";
 import api from "../services/api";
+import InlineLoader from "./ui/InlineLoader";
 
 function AssignToTech({ role }) {
     const [data, setData] = useState([]);
@@ -87,7 +88,7 @@ function AssignToTech({ role }) {
             </div>
 
             {loading ? (
-                <div className="p-10 text-center text-gray-500">Loading requests...</div>
+                <InlineLoader label="Loading requests..." />
             ) : data.length === 0 ? (
                 <div className="p-10 text-center text-gray-500 bg-white rounded-3xl shadow-md">
                     No requests found.

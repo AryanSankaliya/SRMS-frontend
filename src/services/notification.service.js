@@ -1,7 +1,6 @@
 import api from "./api";
 
 const notificationService = {
-    // Get all notifications for the current user
     getUserNotifications: async () => {
         try {
             const response = await api.get("/notification");
@@ -11,7 +10,6 @@ const notificationService = {
         }
     },
 
-    // Mark a single notification as read
     markAsRead: async (id) => {
         try {
             const response = await api.put(`/notification/${id}/read`);
@@ -21,13 +19,21 @@ const notificationService = {
         }
     },
 
-    // Mark all notifications as read
     markAllAsRead: async () => {
         try {
             const response = await api.put("/notification/read-all");
             return response.data;
         } catch (error) {
             throw error.response?.data?.error || "Failed to mark all notifications as read";
+        }
+    },
+
+    getSummary: async (role, userId) => {
+        try {
+            const response = await api.get("/notification/summary", { params: { role, userId } });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.error || "Failed to fetch summary";
         }
     },
 };

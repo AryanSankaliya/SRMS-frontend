@@ -2,8 +2,13 @@ import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { toast } from "react-hot-toast";
 import { Edit2, Trash2, Plus } from "lucide-react";
+import { useConfirm } from "../../components/ui/ConfirmProvider";
+import { getErrorMessage } from "../../utils/errorHandler";
+import InlineLoader from "../../components/ui/InlineLoader";
+import CustomSelect from "../../components/ui/CustomSelect";
 
 function ServiceRequestTypeMaster() {
+    const confirm = useConfirm();
     const [requestTypes, setRequestTypes] = useState([]);
     const [serviceTypes, setServiceTypes] = useState([]); // Dropdown 1
     const [departments, setDepartments] = useState([]);   // Dropdown 2
@@ -44,7 +49,7 @@ function ServiceRequestTypeMaster() {
 
         } catch (error) {
             console.error(error);
-            toast.error("Failed to load data");
+            toast.error(getErrorMessage(error, "Failed to load data"));
         } finally {
             setLoading(false);
         }
@@ -69,7 +74,7 @@ function ServiceRequestTypeMaster() {
                 if (!res.data.error) {
                     toast.success("Updated Successfully!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             } else {
                 // Create
@@ -77,14 +82,14 @@ function ServiceRequestTypeMaster() {
                 if (!res.data.error) {
                     toast.success("Created Successfully!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             }
             closeModal();
             fetchInitialData(); // Refresh list
         } catch (error) {
             console.error(error);
-            toast.error("Operation Failed");
+            toast.error(getErrorMessage(error, "Operation Failed"));
         }
     };
 
@@ -104,18 +109,19 @@ function ServiceRequestTypeMaster() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this Request Type?")) return;
+        const isConfirmed = await confirm("Delete Request Type", "Are you sure you want to delete this Request Type? This action cannot be undone.");
+        if (!isConfirmed) return;
         try {
             const res = await api.delete(`/requestType/${id}`);
             if (!res.data.error) {
                 toast.success("Deleted");
                 fetchInitialData();
             } else {
-                toast.error(res.data.message);
+                toast.error(getErrorMessage(res.data.message));
             }
         } catch (error) {
             console.error(error);
-            toast.error("Delete Failed");
+            toast.error(getErrorMessage(error, "Delete Failed"));
         }
     };
 
@@ -150,11 +156,11 @@ function ServiceRequestTypeMaster() {
             </div>
 
             {loading ? (
-                <div className="text-center py-10 text-gray-500">Loading...</div>
+                <InlineLoader label="Loading request types..." />
             ) : (
                 <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[900px]">
+                    <div className="w-full">
+                        <table className="w-full text-left border-collapse">
                             <thead className="bg-gray-50">
                                 <tr className="text-sm font-semibold text-gray-600 border-b">
                                     <th className="py-3 px-4 whitespace-nowrap">Request Name</th>
@@ -227,33 +233,31 @@ function ServiceRequestTypeMaster() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
-                                    <select
+                                    <CustomSelect
                                         name="serviceTypeId"
                                         value={formData.serviceTypeId}
                                         onChange={handleChange}
                                         required
-                                        className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
                                     >
-                                        <option value="">Select Type</option>
+                                        <option value="" disabled>Select Type</option>
                                         {serviceTypes.map(type => (
                                             <option key={type._id} value={type._id}>{type.serviceTypeName}</option>
                                         ))}
-                                    </select>
+                                    </CustomSelect>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                                    <select
+                                    <CustomSelect
                                         name="serviceDeptId"
                                         value={formData.serviceDeptId}
                                         onChange={handleChange}
                                         required
-                                        className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
                                     >
-                                        <option value="">Select Department</option>
+                                        <option value="" disabled>Select Department</option>
                                         {departments.map(dept => (
                                             <option key={dept._id} value={dept._id}>{dept.serviceDeptName}</option>
                                         ))}
-                                    </select>
+                                    </CustomSelect>
                                 </div>
                             </div>
 
@@ -283,17 +287,15 @@ function ServiceRequestTypeMaster() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Default Priority</label>
-                                <select
+                                <CustomSelect
                                     name="defaultPriorityLevel"
                                     value={formData.defaultPriorityLevel}
                                     onChange={handleChange}
-                                    className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
                                 >
                                     <option value="Low">Low</option>
                                     <option value="Medium">Medium</option>
                                     <option value="High">High</option>
-                                    <option value="Critical">Critical</option>
-                                </select>
+                                </CustomSelect>
                             </div>
 
                             <div className="flex gap-4">

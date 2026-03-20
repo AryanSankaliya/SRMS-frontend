@@ -42,7 +42,7 @@ function Footer() {
                 {/* bottm part */}
 
                 <div className='border-t border-white/20'>
-                {/* left - 1 */}
+                    {/* left - 1 */}
                     <div className='max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4'>
                         <p className='text-sm text-blue-100'> © 2025 SRMS. All rights reserved. v1.0.0</p>
 

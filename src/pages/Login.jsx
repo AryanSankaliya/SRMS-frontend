@@ -4,8 +4,9 @@ import Illustration from "../../assets/Illustration.png";
 import { FaEnvelope, FaLock, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import api from "../../src/services/api";
-
 import toast from "react-hot-toast";
+import { getErrorMessage } from "../utils/errorHandler";
+import PageLoader from "../components/ui/PageLoader";
 
 function Login() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ function Login() {
       });
 
       if (response.data.error) {
-        toast.error(response.data.message);
+        toast.error(getErrorMessage(response.data.message, "Login Failed"));
         setLoading(false);
         return;
       }
@@ -81,18 +82,18 @@ function Login() {
       }
     } catch (error) {
       console.error("Login Error:", error);
-      if (error.response && error.response.data && error.response.data.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Server Error! Make sure Backend is running.");
-      }
+      toast.error(getErrorMessage(error, "Login Failed"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-[#F2F8FF] to-[#FFFFFF] flex w-full">
+    <>
+      {/* Full-screen loader while signing in */}
+      {loading && <PageLoader label="Signing In" />}
+
+      <div className="min-h-screen bg-gradient-to-tr from-[#F2F8FF] to-[#FFFFFF] flex w-full">
       {/* Left Section */}
       <div className="w-1/2 min-h-screen  flex flex-col items-center justify-between py-20">
         <div className="flex flex-col items-center text-center gap-5">
@@ -218,6 +219,7 @@ function Login() {
         </form>
       </div>
     </div>
+    </>
   );
 }
 

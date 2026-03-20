@@ -23,7 +23,7 @@ export default function Sidebar({ role }) {
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-gradient-to-b from-blue-600 to-teal-600 text-white shadow-lg">
+    <aside className="w-64 h-screen sticky top-0 shrink-0 overflow-hidden bg-gradient-to-b from-blue-600 to-teal-600 text-white shadow-lg">
       <div className="flex flex-col h-full">
 
         {/* Logo */}
@@ -53,7 +53,7 @@ export default function Sidebar({ role }) {
               <SidebarLink icon={LayoutDashboard} text="Dashboard" to="/hod/dashboard" />
               <SidebarLink icon={ClipboardList} text="Assign to Tech" to="/hod/assign" />
               <SidebarLink icon={Wrench} text="Technician Management" to="/hod/technician-management" />
-              <SidebarLink icon={BarChart3} text="Master Pages" to="/hod/masterPages" />
+              <SidebarLink icon={BarChart3} text="Master Hub" to="/hod/masterPages" />
             </>
           )}
 

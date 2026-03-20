@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../src/services/api";
+import { useConfirm } from "../components/ui/ConfirmProvider";
+import CustomSelect from "./ui/CustomSelect";
 
 function AddRequestForm() {
   const navigate = useNavigate();
+  const confirm = useConfirm();
 
   // Form State
   const [title, setTitle] = useState("");
@@ -17,30 +20,36 @@ function AddRequestForm() {
   const [requestTypes, setRequestTypes] = useState([]);
   const [errors, setErrors] = useState({});
 
-  // Departments List (Abhi static rakhte hain)
-  const departments = [
-    "IT Department",
-    "Computer Science",
-    "Mechanical Engineering",
-    "Civil Engineering",
-    "Electrical Engineering",
-    "Administration",
-    "Accounts",
-  ];
+  const [departments, setDepartments] = useState([]);
 
+  // Fetch initial data
   useEffect(() => {
-    const fetchTypes = async () => {
+    const fetchInitialData = async () => {
       try {
-        const response = await api.get("/requesttype/");
-        if (!response.data.error) {
-          setRequestTypes(response.data.data);
+        const [reqTypesRes, deptsRes] = await Promise.all([
+          api.get("/requestType/"),
+          api.get("/dept/")
+        ]);
+
+        if (!reqTypesRes.data.error) {
+          setRequestTypes(reqTypesRes.data.data);
+        } else {
+          toast.error("Error loading types: " + reqTypesRes.data.message);
+        }
+
+        if (!deptsRes.data.error) {
+          // Filter active departments if needed, or set all
+          setDepartments(deptsRes.data.data.filter(d => d.isActive !== false));
+        } else {
+          toast.error("Error loading departments: " + deptsRes.data.message);
         }
       } catch (error) {
-        console.error("Error fetching types:", error);
-        toast.error("Could not load service types");
+        console.error("Error fetching data:", error);
+        toast.error("Could not load form data. Please try again.");
       }
     };
-    fetchTypes();
+
+    fetchInitialData();
   }, []);
 
   const handleFiles = (selectedFiles) => {
@@ -84,14 +93,20 @@ function AddRequestForm() {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
 
+      // Get selected department name to match existing backend text expected by `department` field
+      // If backend expects the ObjectId, it should be adjusted, but `department: String` is defined in User model 
+      // Assuming ServiceRequest model `department` field expects a string as it was passed string before.
+      const selectedDeptObj = departments.find(d => d._id === department);
+      const deptName = selectedDeptObj ? selectedDeptObj.serviceDeptName : department;
+
       const payload = {
         serviceRequestTypeId: selectedTypeId,
         serviceRequestTitle: title,
         serviceRequestDescription: description,
-        priority: priority,
-        department: department,
+        priorityLevel: priority,
+        department: deptName, // Currently passing string name for backward compatibility
         createdByUserId: user?._id || "self",
-        userId: user?._id // Adding userId to match the renamed field in ServiceRequest model
+        userId: user?._id
       };
 
       const response = await api.post("/request/", payload);
@@ -99,7 +114,7 @@ function AddRequestForm() {
       if (response.data.error) {
         toast.error("Error: " + response.data.message);
       } else {
-        toast.success("Request Created & Auto-Assigned!");
+        toast.success(response.data.message || "Request Submitted Successfully!");
         navigate("/user/requestlist");
       }
 
@@ -119,6 +134,15 @@ function AddRequestForm() {
     focus:shadow-lg focus:shadow-blue-200/50
     focus:-translate-y-[1px]
   `;
+
+  // Derived state: Filter request types based on selected department
+  const filteredRequestTypes = department
+    ? requestTypes.filter(rt => {
+      // If RequestType has populated `serviceDeptId`, check its `_id`, else compare strings
+      const typeDeptId = rt.serviceDeptId?._id || rt.serviceDeptId;
+      return typeDeptId === department;
+    })
+    : [];
 
   return (
     <div className="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow">
@@ -140,40 +164,47 @@ function AddRequestForm() {
         {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
       </div>
 
-      {/* Service Category (Dynamic from DB) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        {/* Department (First selected to filter categories) */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Department <span className="text-red-500">*</span></label>
+          <CustomSelect
+            className={inputClass(errors.department)}
+            value={department}
+            name="department"
+            onChange={(e) => {
+              setDepartment(e.target.value);
+              setSelectedTypeId(""); // Reset category when department changes
+            }}
+          >
+            <option value="" disabled>Select department...</option>
+            {departments.map((dept) => (
+              <option key={dept._id} value={dept._id}>{dept.serviceDeptName}</option>
+            ))}
+          </CustomSelect>
+          {errors.department && <p className="text-xs text-red-500 mt-1">{errors.department}</p>}
+        </div>
+
+        {/* Service Category (Dynamic, filtered by DB department) */}
         <div>
           <label className="block text-sm font-medium mb-1">Issue Category <span className="text-red-500">*</span></label>
-          <select
+          <CustomSelect
             className={inputClass(errors.serviceType)}
             value={selectedTypeId}
+            name="selectedTypeId"
             onChange={(e) => setSelectedTypeId(e.target.value)}
+            disabled={!department} // Disable if no department is selected
           >
-            <option value="">Select issue type...</option>
-            {/* Backend se aayi list map kar rahe hain */}
-            {requestTypes.map((type) => (
+            <option value="" disabled>
+              {department ? "Select issue type..." : "Please select department first"}
+            </option>
+            {filteredRequestTypes.map((type) => (
               <option key={type._id} value={type._id}>
                 {type.serviceRequestTypeName}
               </option>
             ))}
-          </select>
+          </CustomSelect>
           {errors.serviceType && <p className="text-xs text-red-500 mt-1">{errors.serviceType}</p>}
-        </div>
-
-        {/* Department */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Your Department <span className="text-red-500">*</span></label>
-          <select
-            className={inputClass(errors.department)}
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-          >
-            <option value="">Select your department...</option>
-            {departments.map((dept) => (
-              <option key={dept} value={dept}>{dept}</option>
-            ))}
-          </select>
-          {errors.department && <p className="text-xs text-red-500 mt-1">{errors.department}</p>}
         </div>
       </div>
 
@@ -218,7 +249,13 @@ function AddRequestForm() {
       <div className="mt-8 flex justify-end gap-3">
         <button
           className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-          onClick={() => window.history.back()}
+          onClick={async () => {
+             if (title || description || priority || department) {
+                const isConfirmed = await confirm("Cancel Request Creation", "Are you sure you want to cancel? Any unsaved changes will be lost.");
+                if (!isConfirmed) return;
+             }
+             window.history.back();
+          }}
           disabled={loading}
         >
           Cancel

@@ -4,8 +4,10 @@ import Illustration from "../../assets/Illustration.png";
 import { FaEnvelope, FaLock, FaUser, FaPhone, FaIdCard, FaBuilding } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import api from "../../src/services/api";
-
 import toast from "react-hot-toast";
+import { getErrorMessage } from "../utils/errorHandler";
+import PageLoader from "../components/ui/PageLoader";
+import CustomSelect from "../components/ui/CustomSelect";
 
 function Register() {
     const navigate = useNavigate();
@@ -44,7 +46,7 @@ function Register() {
             const response = await api.post("/user/register", registerData);
 
             if (response.data.error) {
-                toast.error("Registration Failed: " + response.data.message);
+                toast.error(getErrorMessage(response.data.message, "Registration Failed"));
                 setLoading(false);
                 return;
             }
@@ -53,18 +55,16 @@ function Register() {
             navigate("/login");
         } catch (error) {
             console.error("Registration Error:", error);
-            if (error.response && error.response.data && error.response.data.message) {
-                toast.error(error.response.data.message);
-            } else {
-                toast.error("Server Error! Make sure Backend is running.");
-            }
+            toast.error(getErrorMessage(error, "Registration Failed"));
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-tr from-[#F2F8FF] to-[#FFFFFF] flex w-full">
+        <>
+            {loading && <PageLoader label="Creating Account" />}
+            <div className="min-h-screen bg-gradient-to-tr from-[#F2F8FF] to-[#FFFFFF] flex w-full">
             {/* Left Section */}
             <div className="w-1/2 min-h-screen flex flex-col items-center justify-between py-20">
                 <div className="flex flex-col items-center text-center gap-5">
@@ -182,12 +182,12 @@ function Register() {
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                                 <FaBuilding />
                             </span>
-                            <select
+                            <CustomSelect
                                 name="department"
+                                value={formData.department}
                                 onChange={handleChange}
                                 required
-                                className="w-full border rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-400 box-border bg-white text-gray-700 appearance-none"
-                                defaultValue=""
+                                className="w-full box-border"
                             >
                                 <option value="" disabled>Select Department</option>
                                 {[
@@ -201,7 +201,7 @@ function Register() {
                                 ].map((dept) => (
                                     <option key={dept} value={dept}>{dept}</option>
                                 ))}
-                            </select>
+                            </CustomSelect>
                         </div>
                     </div>
 
@@ -266,6 +266,7 @@ function Register() {
                 </form>
             </div>
         </div>
+        </>
     );
 }
 

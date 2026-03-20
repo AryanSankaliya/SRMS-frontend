@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import CustomSelect from "./ui/CustomSelect";
 
 function StatusTable({ data = [], role, showAssign = false }) {
   const navigate = useNavigate();
@@ -21,8 +22,12 @@ function StatusTable({ data = [], role, showAssign = false }) {
           // Changed to /staff as all technicians are now in Staff table
           const res = await api.get("/staff/");
           if (!res.data.error) {
-            // Filter: Only Active staff members
-            const techs = res.data.data.filter(s => s.isActive);
+            // Filter: Only Active staff members and only those with 'technician' designation
+            const techs = res.data.data.filter(s =>
+              s.isActive &&
+              s.designation &&
+              s.designation.toLowerCase().includes("technician")
+            );
             setTechList(techs);
           }
         } catch (error) {
@@ -143,14 +148,14 @@ function StatusTable({ data = [], role, showAssign = false }) {
               {/* Assign Button (Only for HOD/Admin AND if showAssign is true) */}
               {(role === "Hod" || role === "Admin") && showAssign && (
                 <button
-                  className={`px-3 py-1 rounded text-sm transition shadow-sm whitespace-nowrap ${item.status.toLowerCase().includes("assigned") || item.status.toLowerCase().includes("progress") || item.status.toLowerCase().includes("resolved") || item.status.toLowerCase().includes("closed") || item.status.toLowerCase().includes("cancelled")
+                  className={`px-3 py-1 rounded text-sm transition shadow-sm whitespace-nowrap ${item.status.toLowerCase().includes("assigned") || item.status.toLowerCase().includes("progress") || item.status.toLowerCase().includes("resolved") || item.status.toLowerCase().includes("closed") || item.status.toLowerCase().includes("cancelled") || item.status.toLowerCase().includes("completed")
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-teal-500 text-white hover:bg-teal-600"
                     }`}
                   onClick={() => handleAssignClick(item)}
-                  disabled={item.status.toLowerCase().includes("assigned") || item.status.toLowerCase().includes("progress") || item.status.toLowerCase().includes("resolved") || item.status.toLowerCase().includes("closed") || item.status.toLowerCase().includes("cancelled")}
+                  disabled={item.status.toLowerCase().includes("assigned") || item.status.toLowerCase().includes("progress") || item.status.toLowerCase().includes("resolved") || item.status.toLowerCase().includes("closed") || item.status.toLowerCase().includes("cancelled") || item.status.toLowerCase().includes("completed")}
                 >
-                  {item.status.toLowerCase().includes("assigned") || item.status.toLowerCase().includes("progress") ? "Assigned" : "Assign"}
+                  Assign
                 </button>
               )}
             </div>
@@ -167,18 +172,19 @@ function StatusTable({ data = [], role, showAssign = false }) {
               <p className="text-sm text-gray-500 mb-4">Request ID: {selectedReq.id}</p>
 
               <label className="block text-sm font-medium text-gray-700 mb-1">Select Technician</label>
-              <select
-                className="w-full border border-gray-300 px-3 py-2 mb-6 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+              <CustomSelect
+                className="mb-6"
                 value={selectedTech}
+                name="selectedTech"
                 onChange={(e) => setSelectedTech(e.target.value)}
               >
-                <option value="">-- Choose a Technician --</option>
+                <option value="" disabled>-- Choose a Technician --</option>
                 {techList.map((tech) => (
                   <option key={tech._id} value={tech._id}>
-                    {tech.name} ({tech.email})
+                    {tech.firstName} {tech.lastName} ({tech.email})
                   </option>
                 ))}
-              </select>
+              </CustomSelect>
 
               <div className="flex justify-end gap-3">
                 <button

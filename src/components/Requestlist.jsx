@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaTrashAlt } from "react-icons/fa";
 import StatusDropdown from "./StatusDropdown";
 import StatusTable from "./StatusTable";
 import api from "../../src/services/api";
+import toast from "react-hot-toast";
+import { useConfirm } from "./ui/ConfirmProvider";
+import { getErrorMessage } from "../utils/errorHandler";
+import InlineLoader from "./ui/InlineLoader";
 
 function Requestlist({ role }) {
+  const confirm = useConfirm();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get("search") || "";
@@ -110,6 +115,24 @@ function Requestlist({ role }) {
     fetchData();
   }, [role]);
 
+  const handleDeleteAll = async () => {
+    const isConfirmed = await confirm("Delete All Requests", "Are you sure? All service requests will be permanently deleted!");
+    if (!isConfirmed) return;
+
+    try {
+      const res = await api.delete("/request/all");
+      if (!res.data.error) {
+        toast.success(res.data.message || "All requests have been deleted!");
+        setData([]);
+      } else {
+        toast.error(getErrorMessage(res.data.message));
+      }
+    } catch (error) {
+      console.error("Delete All Error:", error);
+      toast.error(getErrorMessage(error, "Server error while deleting all requests!"));
+    }
+  };
+
   const filteredData = data.filter((item) => {
     const matchesStatus =
       statusFilter === "All" ||
@@ -143,12 +166,21 @@ function Requestlist({ role }) {
             <StatusDropdown value={statusFilter} onChange={setStatusFilter} />
           </div>
         </div>
+
+        {/* Delete All Button - Only for Hod/Admin */}
+        {(role === "Hod" || role === "Admin") && (
+          <button
+            onClick={handleDeleteAll}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-full transition shadow-sm"
+          >
+            <FaTrashAlt className="w-3.5 h-3.5" />
+            Delete All Requests
+          </button>
+        )}
       </div>
 
       {loading ? (
-        <div className="p-10 text-center text-gray-500">
-          Loading your tickets...
-        </div>
+      <InlineLoader label="Loading your tickets..." />
       ) : filteredData.length === 0 ? (
         <div className="p-10 text-center text-gray-500 bg-white mt-5 rounded-3xl shadow-md">
           No requests found.

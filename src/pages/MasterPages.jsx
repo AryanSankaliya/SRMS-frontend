@@ -12,9 +12,8 @@ import {
 
 const masterPages = [
   { name: "Departments", path: "/hod/masterPages/service-department", icon: LayoutDashboard },
-  { name: "Dept. Persons", path: "/hod/masterPages/service-department-person", icon: Users },
   { name: "Request Types", path: "/hod/masterPages/service-request-type", icon: FileText },
-  { name: "Req. Type Persons", path: "/hod/masterPages/service-request-type-wise-person", icon: UserCheck },
+  { name: "Req. Type Persons", path: "/hod/masterPages/technician-management", icon: UserCheck },
   { name: "Service Types", path: "/hod/masterPages/service-type", icon: List },
   { name: "Statuses", path: "/hod/masterPages/status-master", icon: CheckCircle },
 ];
@@ -46,8 +45,8 @@ export default function MasterPages() {
                 key={page.path}
                 to={page.path}
                 className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
-                    ? "bg-teal-50 text-teal-700 border border-teal-100"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-teal-50 text-teal-700 border border-teal-100"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
               >
                 <Icon size={18} className={isActive ? "text-teal-600" : "text-gray-400"} />

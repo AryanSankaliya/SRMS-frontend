@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { toast } from "react-hot-toast";
 import { Edit2, Trash2, Plus } from "lucide-react";
+import { useConfirm } from "../../components/ui/ConfirmProvider";
+import { getErrorMessage } from "../../utils/errorHandler";
+import InlineLoader from "../../components/ui/InlineLoader";
 
 function StatusMaster() {
+    const confirm = useConfirm();
     const [statuses, setStatuses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,7 +39,7 @@ function StatusMaster() {
             }
         } catch (error) {
             console.error(error);
-            toast.error("Failed to fetch statuses");
+            toast.error(getErrorMessage(error, "Failed to fetch statuses"));
         } finally {
             setLoading(false);
         }
@@ -60,7 +64,7 @@ function StatusMaster() {
                 if (!res.data.error) {
                     toast.success("Status Updated!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             } else {
                 // Create
@@ -68,14 +72,14 @@ function StatusMaster() {
                 if (!res.data.error) {
                     toast.success("Status Added!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             }
             closeModal();
             fetchStatuses();
         } catch (error) {
             console.error(error);
-            toast.error("Operation Failed");
+            toast.error(getErrorMessage(error, "Operation Failed"));
         }
     };
 
@@ -94,18 +98,20 @@ function StatusMaster() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this status?")) return;
+        const isConfirmed = await confirm("Delete Status", "Are you sure you want to delete this status? This action cannot be undone.");
+        if (!isConfirmed) return;
+        
         try {
             const res = await api.delete(`/status/${id}`);
             if (!res.data.error) {
                 toast.success("Status Deleted");
                 fetchStatuses();
             } else {
-                toast.error(res.data.message);
+                toast.error(getErrorMessage(res.data.message));
             }
         } catch (error) {
             console.error(error);
-            toast.error("Delete Failed");
+            toast.error(getErrorMessage(error, "Delete Failed"));
         }
     };
 
@@ -139,7 +145,7 @@ function StatusMaster() {
             </div>
 
             {loading ? (
-                <div className="text-center py-10 text-gray-500">Loading...</div>
+                <InlineLoader label="Loading status list..." />
             ) : (
                 <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">

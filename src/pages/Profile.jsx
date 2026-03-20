@@ -11,8 +11,11 @@ import {
   Calendar,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useConfirm } from "../components/ui/ConfirmProvider";
+import CustomSelect from "../components/ui/CustomSelect";
 
 function Profile() {
+  const confirm = useConfirm();
   const [user, setUser] = useState({});
   const [formData, setFormData] = useState({
     firstName: "",
@@ -193,12 +196,12 @@ function Profile() {
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Department</label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <select
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none"
+                  <CustomSelect
+                    className="pl-7"
                     disabled
                   >
                     <option>{user.department || "General"}</option>
-                  </select>
+                  </CustomSelect>
                 </div>
               </div>
             </div>
@@ -206,7 +209,19 @@ function Profile() {
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-4">
-            <button className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+            <button 
+              onClick={async () => {
+                const isDirty = formData.firstName !== (user.firstName || "") || 
+                                formData.lastName !== (user.lastName || "") || 
+                                formData.mobile !== (user.mobile || "") || 
+                                formData.password !== "";
+                if (isDirty) {
+                  const isConfirmed = await confirm("Cancel Changes", "Are you sure you want to discard your unsaved changes?");
+                  if (!isConfirmed) return;
+                }
+                window.location.reload();
+              }}
+              className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
               Cancel
             </button>
             <button

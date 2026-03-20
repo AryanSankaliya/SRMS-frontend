@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { toast } from "react-hot-toast";
 import { Edit2, Trash2, Plus } from "lucide-react";
+import { useConfirm } from "../../components/ui/ConfirmProvider";
+import { getErrorMessage } from "../../utils/errorHandler";
+import InlineLoader from "../../components/ui/InlineLoader";
 
 function ServiceDepartmentMaster() {
+    const confirm = useConfirm();
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,7 +40,7 @@ function ServiceDepartmentMaster() {
             }
         } catch (error) {
             console.error(error);
-            toast.error("Failed to fetch departments");
+            toast.error(getErrorMessage(error, "Failed to fetch departments"));
         } finally {
             setLoading(false);
         }
@@ -61,7 +65,7 @@ function ServiceDepartmentMaster() {
                 if (!res.data.error) {
                     toast.success("Department Updated!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             } else {
                 // Create
@@ -69,14 +73,14 @@ function ServiceDepartmentMaster() {
                 if (!res.data.error) {
                     toast.success("Department Added!");
                 } else {
-                    toast.error(res.data.message);
+                    toast.error(getErrorMessage(res.data.message));
                 }
             }
             closeModal();
             fetchDepartments();
         } catch (error) {
             console.error(error);
-            toast.error("Operation Failed");
+            toast.error(getErrorMessage(error, "Operation Failed"));
         }
     };
 
@@ -94,18 +98,19 @@ function ServiceDepartmentMaster() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this department?")) return;
+        const isConfirmed = await confirm("Delete Department", "Are you sure you want to delete this department?");
+        if (!isConfirmed) return;
         try {
             const res = await api.delete(`/dept/${id}`);
             if (!res.data.error) {
                 toast.success("Department Deleted");
                 fetchDepartments();
             } else {
-                toast.error(res.data.message);
+                toast.error(getErrorMessage(res.data.message));
             }
         } catch (error) {
             console.error(error);
-            toast.error("Delete Failed");
+            toast.error(getErrorMessage(error, "Delete Failed"));
         }
     };
 
@@ -138,19 +143,19 @@ function ServiceDepartmentMaster() {
             </div>
 
             {loading ? (
-                <div className="text-center py-10 text-gray-500">Loading...</div>
+                <InlineLoader label="Loading departments..." />
             ) : (
                 <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
                     {/* ONLY TABLE SCROLLS */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[600px]">
+                    <div className="">
+                        <table className="w-full text-left border-collapse">
                             <thead className="bg-gray-50">
                                 <tr className="text-sm font-semibold text-gray-600 border-b">
-                                    <th className="py-3 px-4 whitespace-nowrap">Name</th>
-                                    <th className="py-3 px-4 whitespace-nowrap">Description</th>
-                                    <th className="py-3 px-4 whitespace-nowrap">CC Email</th>
-                                    <th className="py-3 px-4 whitespace-nowrap">Title Disabled?</th>
-                                    <th className="py-3 px-4 whitespace-nowrap text-right">Actions</th>
+                                    <th className="py-3 px-4">Name</th>
+                                    <th className="py-3 px-4">Description</th>
+                                    <th className="py-3 px-4">CC Email</th>
+                                    <th className="py-3 px-4">Title Disabled?</th>
+                                    <th className="py-3 px-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -167,7 +172,7 @@ function ServiceDepartmentMaster() {
                                             <td className="py-3 px-4 text-gray-600 max-w-xs truncate" title={dept.description}>
                                                 {dept.description}
                                             </td>
-                                            <td className="py-3 px-4 text-gray-600">{dept.ccEmailToCSV || "-"}</td>
+                                            <td className="py-3 px-4 text-gray-600 break-all">{dept.ccEmailToCSV || "-"}</td>
                                             <td className="py-3 px-4">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${dept.isRequestTitleDisable ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                                                     {dept.isRequestTitleDisable ? "Yes" : "No"}

@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
+import { getErrorMessage } from "../utils/errorHandler";
+import { useConfirm } from "../components/ui/ConfirmProvider";
+import InlineLoader from "../components/ui/InlineLoader";
 
 const RequestDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusList, setStatusList] = useState([]);
@@ -29,7 +33,7 @@ const RequestDetails = () => {
         }
       } catch (error) {
         console.error("Error:", error);
-        toast.error("Could not fetch details");
+        toast.error(getErrorMessage(error, "Could not fetch details"));
       } finally {
         setLoading(false);
       }
@@ -38,6 +42,16 @@ const RequestDetails = () => {
   }, [id]);
 
   const handleStatusChange = async (newStatusName) => {
+    if (newStatusName === "Cancelled" || newStatusName === "Closed") {
+      const action = newStatusName === "Cancelled" ? "Cancel Request" : "Close Ticket";
+      const message = newStatusName === "Cancelled" 
+        ? "Are you sure you want to cancel this request? This action cannot be undone."
+        : "Are you sure you want to close this ticket?";
+      
+      const isConfirmed = await confirm(action, message);
+      if (!isConfirmed) return;
+    }
+
     const targetStatus = statusList.find(
       (s) =>
         s.serviceRequestStatusName?.toLowerCase() ===
@@ -47,7 +61,7 @@ const RequestDetails = () => {
     );
 
     if (!targetStatus) {
-      toast.error(`Error: '${newStatusName}' status Database mein nahi mila!`);
+      toast.error(`Error: '${newStatusName}' status not found!`);
       return;
     }
 
@@ -61,18 +75,17 @@ const RequestDetails = () => {
         toast.success(`Ticket Status Updated to ${newStatusName}!`);
         window.location.reload();
       } else {
-        toast.error("Update failed: " + response.data.message);
+        toast.error(getErrorMessage(response.data.message));
       }
     } catch (error) {
       console.error(error);
-      toast.error("Server Error while updating!");
+      toast.error(getErrorMessage(error, "Server Error while updating!"));
     } finally {
       setUpdating(false);
     }
   };
 
-  if (loading)
-    return <div className="p-10 text-center">Loading Details...</div>;
+  if (loading) return <InlineLoader label="Loading ticket details..." />;
   if (!ticket) return <div className="p-10 text-center">Ticket not found</div>;
 
   return (
@@ -125,9 +138,9 @@ const RequestDetails = () => {
             Priority
           </p>
           <p
-            className={`font-medium ${ticket.priority === "High" ? "text-red-600" : "text-gray-700"}`}
+            className={`font-medium ${ticket.priorityLevel === "High" ? "text-red-600" : ticket.priorityLevel === "Low" ? "text-green-600" : "text-gray-700"}`}
           >
-            {ticket.priority || "Medium"}
+            {ticket.priorityLevel || "Not Set"}
           </p>
         </div>
         <div>
@@ -147,7 +160,9 @@ const RequestDetails = () => {
             Assigned To
           </p>
           <p className="font-medium text-blue-600">
-            {ticket.assignedToUserId?.name || "Unassigned"}
+            {ticket.assignedToUserId
+              ? `${ticket.assignedToUserId.firstName || ""} ${ticket.assignedToUserId.lastName || ""}`.trim() || "Unassigned"
+              : "Unassigned"}
           </p>
         </div>
       </div>
@@ -198,8 +213,8 @@ const RequestDetails = () => {
                 ["In Progress", "Completed", "Resolved", "Closed"].includes(ticket.serviceRequestStatusId?.serviceRequestStatusName)
               }
               className={`px-6 py-2 rounded-lg text-white transition ${["In Progress", "Completed", "Resolved", "Closed"].includes(ticket.serviceRequestStatusId?.serviceRequestStatusName)
-                  ? "bg-yellow-300 cursor-not-allowed"
-                  : "bg-yellow-500 hover:bg-yellow-600"
+                ? "bg-yellow-300 cursor-not-allowed"
+                : "bg-yellow-500 hover:bg-yellow-600"
                 }`}
             >
               {updating ? "Wait..." : "Start Work"}
@@ -211,8 +226,8 @@ const RequestDetails = () => {
                 ["Completed", "Resolved", "Closed"].includes(ticket.serviceRequestStatusId?.serviceRequestStatusName)
               }
               className={`px-6 py-2 rounded-lg text-white transition ${["Completed", "Resolved", "Closed"].includes(ticket.serviceRequestStatusId?.serviceRequestStatusName)
-                  ? "bg-green-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"
+                ? "bg-green-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
                 }`}
             >
               {updating ? "Wait..." : "Mark as Completed"}
@@ -227,7 +242,7 @@ const RequestDetails = () => {
               updating ||
               ticket.serviceRequestStatusId?.serviceRequestStatusName ===
               "Closed" ||
-              ticket.serviceRequestStatusId?.serviceRequestStatusName !== "Completed" // Only allow close if Completed
+              ticket.serviceRequestStatusId?.serviceRequestStatusName !== "Completed"
             }
             className="px-6 py-2 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
